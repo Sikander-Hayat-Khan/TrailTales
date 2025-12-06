@@ -1,10 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+/* src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+@import 'leaflet/dist/leaflet.css'; /* Import Leaflet CSS */
 
-body {
+/* ... PASTE YOUR ENTIRE CSS HERE (Global Reset, Landing, Auth, etc.) ... */
+
+/* Make sure to include the CSS provided in your prompt below this line */
+* {
   margin: 0;
-  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
+  box-sizing: border-box;
 }
+body {
+  background-color: #151925;
+  color: #d9d9d9;
+  font-family: "Nunito", sans-serif;
+  overflow: hidden;
+}
+/* ... continue with the rest of your CSS ... */
