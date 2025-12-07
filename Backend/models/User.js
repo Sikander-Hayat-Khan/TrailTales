@@ -20,7 +20,7 @@ UserSchema.pre("save",async function(){
     this.password = await bcryptjs.hash(this.password,salt)
 })
 UserSchema.methods.createJWT = function(){
-    return jwt.sign({userID:this._id,username: this.username},process.env.JWT_KEY,{expiresIn:"30d"})
+    return jwt.sign({userID:this._id,username: this.username},process.env.JWT_SECRET,{expiresIn:"30d"})
 }
 
 export default mongoose.model("User",UserSchema)
