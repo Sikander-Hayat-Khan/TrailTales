@@ -8,6 +8,9 @@ import "dotenv/config"
 
 const app = express()
 
+// Trust proxy for secure cookies behind load balancer (Render)
+app.set('trust proxy', 1);
+
 app.use(cors({
     origin: ["http://localhost:5173", "http://localhost:5174", "https://trail-tales-chi.vercel.app", /\.vercel\.app$/],
     credentials: true,
@@ -16,7 +19,8 @@ app.use(cors({
 }));
 
 // Handle preflight requests explicitly
-app.options('*', cors());
+// In Express 5, '*' is not valid. Use '(.*)' to match all routes.
+app.options('(.*)', cors());
 
 app.use(express.json())
 app.use(cookieParser())
