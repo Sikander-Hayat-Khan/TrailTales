@@ -1,0 +1,77 @@
+/* Friend Requests Styles */
+.friend-requests-section {
+  padding: 10px 20px;
+}
+
+.friend-requests-section h5 {
+  color: #8b9bb4;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 15px;
+}
+
+.friend-request-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.req-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.req-info span {
+  font-weight: 600;
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.req-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.accept-btn, .reject-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.accept-btn {
+  background: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+}
+
+.accept-btn:hover {
+  background: #2ecc71;
+  color: #fff;
+}
+
+.reject-btn {
+  background: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
+}
+
+.reject-btn:hover {
+  background: #e74c3c;
+  color: #fff;
+}
+
+.friend-avatar.small {
+  width: 32px;
+  height: 32px;
+  font-size: 0.9rem;
+}

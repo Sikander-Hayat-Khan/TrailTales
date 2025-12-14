@@ -7,6 +7,9 @@ const Navbar = ({
   isProfileDropdownOpen,
   setProfileDropdownOpen,
   setProfileModalOpen,
+  isLoggedIn,
+  handleLogout,
+  user,
 }) => {
   return (
     <nav>
@@ -16,61 +19,91 @@ const Navbar = ({
       </div>
 
       <div className="nav-links">
-        <a
-          href="#"
-          className="btn-login"
-          onClick={() => {
-            setAuthMode("login");
-            setAuthModalOpen(true);
-          }}
-        >
-          Login
-        </a>
-        <a
-          href="#"
-          className="btn-signup"
-          onClick={() => {
-            setAuthMode("signup");
-            setAuthModalOpen(true);
-          }}
-        >
-          Sign Up
-        </a>
+        {!isLoggedIn && (
+          <>
+            <button
+              className="btn-login"
+              onClick={() => {
+                setAuthMode("login");
+                setAuthModalOpen(true);
+              }}
+              aria-label="Login"
+            >
+              Login
+            </button>
+            <button
+              className="btn-signup"
+              onClick={() => {
+                setAuthMode("signup");
+                setAuthModalOpen(true);
+              }}
+              aria-label="Sign Up"
+            >
+              Sign Up
+            </button>
+          </>
+        )}
 
         <div className="profile-menu-container">
           <button
             className="btn-profile-header"
             onClick={() => setProfileDropdownOpen(!isProfileDropdownOpen)}
+            aria-label="User Profile Menu"
+            aria-expanded={isProfileDropdownOpen}
+            aria-haspopup="true"
+            style={isLoggedIn && user?.avatarColor ? { backgroundColor: user.avatarColor, border: "none" } : {}}
           >
-            JM
+            <i className="ph ph-user" style={{ fontSize: "1.2rem", color: isLoggedIn && user?.avatarColor ? "#fff" : "inherit" }}></i>
           </button>
           <div
             id="profile-dropdown"
             className={`profile-dropdown ${
               isProfileDropdownOpen ? "active" : ""
             }`}
+            role="menu"
           >
             <div className="dropdown-info">
-              <span className="user-name">John M.</span>
-              <span className="user-email">john@trailtales.com</span>
+              <span className="user-name">
+                {isLoggedIn && user 
+                  ? (user.username.includes("@") ? user.username.split("@")[0] : user.username)
+                  : "Guest User"}
+              </span>
+              <span className="user-email">{isLoggedIn && user ? user.email : "Guest@trailtales.com"}</span>
             </div>
             <hr />
-            <a
-              href="#"
+            <button
+              className="dropdown-item"
               onClick={() => {
                 setProfileDropdownOpen(false);
                 setProfileModalOpen(true);
               }}
+              role="menuitem"
             >
               <i className="ph ph-user"></i> My Profile
-            </a>
-            <a href="#">
+            </button>
+            <button 
+              className="dropdown-item"
+              onClick={(e) => {
+                e.preventDefault();
+                alert("Settings feature coming soon!");
+              }}
+              role="menuitem"
+            >
               <i className="ph ph-gear"></i> Settings
-            </a>
+            </button>
             <hr />
-            <a href="#" className="logout-link">
-              <i className="ph ph-sign-out"></i> Log Out
-            </a>
+            {isLoggedIn && (
+              <button 
+                className="dropdown-item logout-link" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLogout();
+                }}
+                role="menuitem"
+              >
+                <i className="ph ph-sign-out"></i> Log Out
+              </button>
+            )}
           </div>
         </div>
       </div>

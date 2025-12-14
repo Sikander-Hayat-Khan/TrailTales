@@ -1,6 +1,29 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import api from "../api/axios";
 
-const ProfileModal = ({ isOpen, onClose }) => {
+const ProfileModal = ({ isOpen, onClose, user, setUser, handleToast }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [bio, setBio] = useState("");
+  const [avatarColor, setAvatarColor] = useState("#f28b50");
+
+  useEffect(() => {
+    if (user) {
+        setBio(user.bio || "Just a traveler exploring the world one pin at a time.");
+        setAvatarColor(user.avatarColor || "#f28b50");
+    }
+  }, [user]);
+
+  const handleSave = async () => {
+    try {
+        const res = await api.patch("/profile", { bio, avatarColor });
+        setUser(res.data.user);
+        setIsEditing(false);
+        handleToast("Success", "Profile updated successfully", "success");
+    } catch (error) {
+        handleToast("Error", "Failed to update profile", "error");
+    }
+  };
+
   return (
     <div
       id="profile-modal-overlay"
@@ -12,36 +35,60 @@ const ProfileModal = ({ isOpen, onClose }) => {
           <i className="ph ph-x"></i>
         </button>
         <div className="modal-header">
-          <div className="avatar large-modal-avatar">JM</div>
-          <h2>John Doe</h2>
-          <p className="modal-email">john@trailtales.com</p>
+          <div className="avatar large-modal-avatar" style={{ background: avatarColor }}>
+            <i className="ph ph-user" style={{ fontSize: "3rem" }}></i>
+          </div>
+          {isEditing && (
+             <div style={{ margin: "10px 0" }}>
+                 <label style={{ display: "block", marginBottom: "5px", fontSize: "0.9rem" }}>Avatar Color</label>
+                 <input 
+                    type="color" 
+                    value={avatarColor} 
+                    onChange={(e) => setAvatarColor(e.target.value)} 
+                 />
+             </div>
+          )}
+          <h2>{user ? user.username : "Guest User"}</h2>
+          <p className="modal-email">{user ? user.email : "guest@trailtales.com"}</p>
           <div className="modal-badges">
             <span className="badge">Traveler</span>
-            <span className="badge">Pro Member</span>
           </div>
         </div>
         <div className="modal-stats">
           <div className="stat-box">
-            <strong>12</strong>
+            <strong>0</strong>
             <span>Trips</span>
           </div>
           <div className="stat-box">
-            <strong>45</strong>
+            <strong>0</strong>
             <span>Pins</span>
           </div>
           <div className="stat-box">
-            <strong>8</strong>
+            <strong>0</strong>
             <span>Countries</span>
           </div>
         </div>
         <div className="modal-bio">
           <label>Bio</label>
-          <p>
-            Digital nomad exploring the world one coffee shop at a time. Currently
-            wandering through Europe.
-          </p>
+          {isEditing ? (
+            <textarea 
+              value={bio} 
+              onChange={(e) => setBio(e.target.value)}
+              rows="4"
+              style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd", color: "#000" }}
+            />
+          ) : (
+            <p>{bio}</p>
+          )}
         </div>
-        <button className="edit-profile-btn">Edit Profile</button>
+        {isEditing ? (
+          <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
+            <button className="edit-profile-btn" onClick={handleSave} style={{ flex: 1 }}>Save</button>
+            <button className="edit-profile-btn" onClick={() => setIsEditing(false)} style={{ flex: 1, background: "#ccc", color: "#333" }}>Cancel</button>
+          </div>
+        ) : (
+          <button className="edit-profile-btn" onClick={() => setIsEditing(true)}>Edit Profile</button>
+        )}
       </div>
     </div>
   );

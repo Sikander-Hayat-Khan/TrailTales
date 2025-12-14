@@ -9,10 +9,32 @@ const UserSchema = new mongoose.Schema({
         trim : true,
         unique: true
     },
+    email: {
+        type: String,
+        required: [true, "No email provided"],
+        unique: true,
+        match: [
+            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+            "Please provide a valid email",
+        ],
+    },
     password:{
         type: String,
         required: [true,"No password provided"]
-    }
+    },
+    bio: {
+        type: String,
+        default: "Just a traveler exploring the world one pin at a time.",
+        maxlength: 150,
+    },
+    avatarColor: {
+        type: String,
+        default: "#f28b50",
+    },
+    friends: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }]
 })
 UserSchema.pre("save",async function(){
     if (!this.isModified('password')) return;

@@ -5,7 +5,7 @@ async function authorization(req,res,next){
         return res.status(401).json({msg: "Not authorized"})
     }
     try {
-        const token = jwt.verify(req.cookies.token,process.env.JWT_KEY)
+        const token = jwt.verify(req.cookies.token,process.env.JWT_SECRET)
         req.user = token
         next()
     } catch (error) {
