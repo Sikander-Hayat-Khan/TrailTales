@@ -31,6 +31,10 @@ const MemorySchema = new mongoose.Schema({
     lng: { type: Number, required: true },
     name: { type: String },
   },
+  country: {
+    type: String,
+    default: null
+  },
   images: [{
     type: String, // URL or base64
   }],

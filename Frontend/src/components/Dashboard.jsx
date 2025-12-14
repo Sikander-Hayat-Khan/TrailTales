@@ -137,12 +137,21 @@ const Dashboard = ({
       );
       const data = await response.json();
       
+      let country = null;
+      try {
+          const countryRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          const countryData = await countryRes.json();
+          country = countryData.address?.country || null;
+      } catch (e) {
+          console.error("Failed to fetch country", e);
+      }
+
       if (data && data.features && data.features.length > 0) {
         // Get the most relevant place name
         const placeName = data.features[0].place_name;
-        setSelectedLocation(prev => ({ ...prev, name: placeName }));
+        setSelectedLocation(prev => ({ ...prev, name: placeName, country }));
       } else {
-        setSelectedLocation(prev => ({ ...prev, name: `${lat.toFixed(4)}, ${lng.toFixed(4)}` }));
+        setSelectedLocation(prev => ({ ...prev, name: `${lat.toFixed(4)}, ${lng.toFixed(4)}`, country }));
       }
     } catch (error) {
       console.error("Error fetching location name:", error);
@@ -175,6 +184,11 @@ const Dashboard = ({
         
         // Append location (as JSON string for backend parsing)
         formData.append("location", JSON.stringify(memoryData.location));
+        
+        // Append country if available
+        if (memoryData.location && memoryData.location.country) {
+            formData.append("country", memoryData.location.country);
+        }
 
         // Append tags
         if (memoryData.tags && memoryData.tags.length > 0) {
@@ -370,6 +384,10 @@ const Dashboard = ({
         handleToast={handleToast}
         user={user}
         selectedFriend={selectedFriend}
+        stats={{
+            pins: memories.length,
+            countries: new Set(memories.map(m => m.country).filter(Boolean)).size
+        }}
       />
 
       <nav className="mobile-nav">

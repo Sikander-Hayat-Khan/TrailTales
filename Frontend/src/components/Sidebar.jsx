@@ -11,7 +11,8 @@ const Sidebar = ({
   openChatWith,
   handleToast,
   user,
-  selectedFriend
+  selectedFriend,
+  stats
 }) => {
   const [showAddFriendInput, setShowAddFriendInput] = useState(false);
   const [newFriendName, setNewFriendName] = useState("");
@@ -157,11 +158,11 @@ const Sidebar = ({
             <span>Trips</span>
           </div>
           <div className="stat-box">
-            <strong>0</strong>
+            <strong>{stats?.pins || user?.pinsCount || 0}</strong>
             <span>Pins</span>
           </div>
           <div className="stat-box">
-            <strong>0</strong>
+            <strong>{stats?.countries || user?.countriesCount || 0}</strong>
             <span>Countries</span>
           </div>
         </div>
