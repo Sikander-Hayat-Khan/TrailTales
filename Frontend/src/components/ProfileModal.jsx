@@ -1,17 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState} from "react";
 import api from "../api/axios";
 
 const ProfileModal = ({ isOpen, onClose, user, setUser, handleToast }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [bio, setBio] = useState("");
-  const [avatarColor, setAvatarColor] = useState("#f28b50");
-
-  useEffect(() => {
-    if (user) {
-        setBio(user.bio || "Just a traveler exploring the world one pin at a time.");
-        setAvatarColor(user.avatarColor || "#f28b50");
-    }
-  }, [user]);
+  const [bio, setBio] = useState(user?.bio || "Just a traveler exploring the world one pin at a time.");
+  const [avatarColor, setAvatarColor] = useState(user?.avatarColor || "#f28b50");
 
   const handleSave = async () => {
     try {
@@ -20,7 +13,7 @@ const ProfileModal = ({ isOpen, onClose, user, setUser, handleToast }) => {
         setIsEditing(false);
         handleToast("Success", "Profile updated successfully", "success");
     } catch (error) {
-        handleToast("Error", "Failed to update profile", "error");
+        handleToast("Error", "Failed to update profile", error.message);
     }
   };
 

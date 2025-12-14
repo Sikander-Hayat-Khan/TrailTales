@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import api from "../api/axios";
 
 const AuthModal = ({ isOpen, onClose, authMode, setAuthMode, logo, handleToast, setIsLoggedIn, setUser }) => {
-  const [username, setUsername] = useState(""); // This is actually email in the backend model now? Wait, backend uses 'username' but frontend validates email.
   // Backend User model has 'username' and 'email'. 
   // Frontend input placeholder says "Email".
   // I should probably send 'email' as 'email' and 'username' as 'username'.
@@ -115,7 +114,7 @@ const AuthModal = ({ isOpen, onClose, authMode, setAuthMode, logo, handleToast, 
                 if (profileRes.data.user) {
                     setUser(profileRes.data.user);
                 }
-            } catch (err) {
+            } catch {
                 console.error("Failed to fetch profile after login");
             }
         }

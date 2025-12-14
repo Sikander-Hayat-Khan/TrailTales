@@ -18,6 +18,7 @@ const Dashboard = ({
 }) => {
   const [friends, setFriends] = useState([]);
   const [chatTitle, setChatTitle] = useState("Chat");
+  const [selectedFriend, setSelectedFriend] = useState(null);
   
   // Memory Modal State
   const [isMemoryModalOpen, setMemoryModalOpen] = useState(false);
@@ -48,9 +49,14 @@ const Dashboard = ({
         }
       };
       fetchMemories();
-    } else {
-        setMemories([]);
-        setFriendsMemories([]);
+    }
+  }, [user]);
+
+  // Clear memories when user logs out
+  useEffect(() => {
+    if (!user) {
+      setMemories([]);
+      setFriendsMemories([]);
     }
   }, [user]);
 
@@ -58,8 +64,9 @@ const Dashboard = ({
     setActiveView(viewName);
   };
 
-  const openChatWith = (friendName) => {
-    setChatTitle("Chat with " + friendName);
+  const openChatWith = (friend) => {
+    setChatTitle("Chat with " + friend.name);
+    setSelectedFriend(friend);
     switchView("chat");
   };
 
@@ -117,19 +124,12 @@ const Dashboard = ({
         formData.append("mood", memoryData.mood);
         formData.append("visibility", memoryData.visibility || "private");
         
-        // Append location (as JSON string or separate fields, backend expects object structure)
-        // Mongoose can handle nested objects if sent as "location[lat]" etc.
-        // Or we can send it as JSON and parse it in backend? 
-        // Express body-parser handles JSON, but multer handles multipart.
-        // Multer populates req.body.
-        // Let's send flattened location fields
-        formData.append("location[lat]", memoryData.location.lat);
-        formData.append("location[lng]", memoryData.location.lng);
-        formData.append("location[name]", memoryData.location.name);
+        // Append location (as JSON string for backend parsing)
+        formData.append("location", JSON.stringify(memoryData.location));
 
         // Append tags
         if (memoryData.tags && memoryData.tags.length > 0) {
-            memoryData.tags.forEach(tag => formData.append("tags[]", tag));
+            memoryData.tags.forEach(tag => formData.append("tags", tag));
         }
 
         // Append new image files
@@ -312,6 +312,7 @@ const Dashboard = ({
         openChatWith={openChatWith}
         handleToast={handleToast}
         user={user}
+        selectedFriend={selectedFriend}
       />
 
       <nav className="mobile-nav">
