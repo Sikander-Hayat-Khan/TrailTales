@@ -56,6 +56,33 @@ const Dashboard = ({
     };
   }, [user]);
 
+  // Poll for friends memories when toggle is active
+  useEffect(() => {
+    let interval;
+    if (user && showFriendsMemories) {
+        const fetchFriendsMemories = async () => {
+            try {
+                const res = await api.get("/memories/friends");
+                // Only update if data changed to avoid unnecessary re-renders? 
+                // React state updates are cheap if reference is same, but here it's new array.
+                // For now, just update.
+                setFriendsMemories(res.data.memories);
+            } catch (error) {
+                console.error("Polling friends memories failed", error);
+            }
+        };
+
+        // Initial fetch immediately when toggled on
+        fetchFriendsMemories();
+
+        // Poll every 5 seconds
+        interval = setInterval(fetchFriendsMemories, 5000);
+    }
+    return () => {
+        if (interval) clearInterval(interval);
+    };
+  }, [user, showFriendsMemories]);
+
   const switchView = (viewName) => {
     setActiveView(viewName);
   };
@@ -280,6 +307,7 @@ const Dashboard = ({
         <Suspense fallback={<div className="loading-spinner">Loading Calendar...</div>}>
           <CalendarView 
             memories={memories} 
+            friendsMemories={showFriendsMemories ? friendsMemories : []}
             onDateClick={(dateMemories) => {
               handleToast("Memories", `Found ${dateMemories.length} memories on this date`, "info");
             }}
