@@ -41,6 +41,7 @@ export const getFriendsMemories = async (req, res) => {
 
 export const createMemory = async (req, res) => {
   try {
+    console.log("Create Memory Body:", req.body);
     req.body.userId = req.user.userID;
     
     // Handle file uploads
@@ -50,7 +51,16 @@ export const createMemory = async (req, res) => {
     }
 
     // Parse location from FormData (which flattens objects)
-    if (req.body['location[lat]']) {
+    if (req.body.location) {
+        if (typeof req.body.location === 'string') {
+            try {
+                req.body.location = JSON.parse(req.body.location);
+            } catch (e) {
+                console.error("Failed to parse location JSON", e);
+                return res.status(400).json({ msg: "Invalid location format" });
+            }
+        }
+    } else if (req.body['location[lat]']) {
         req.body.location = {
             lat: parseFloat(req.body['location[lat]']),
             lng: parseFloat(req.body['location[lng]']),
@@ -59,8 +69,12 @@ export const createMemory = async (req, res) => {
     }
 
     // Parse tags
-    if (req.body['tags[]']) {
+    if (req.body.tags) {
+        req.body.tags = Array.isArray(req.body.tags) ? req.body.tags : [req.body.tags];
+    } else if (req.body['tags[]']) {
         req.body.tags = Array.isArray(req.body['tags[]']) ? req.body['tags[]'] : [req.body['tags[]']];
+    } else {
+        req.body.tags = [];
     }
 
     const memory = await Memory.create(req.body);
@@ -104,7 +118,13 @@ export const updateMemory = async (req, res) => {
     }
 
     // Parse location from FormData
-    if (req.body['location[lat]']) {
+    if (req.body.location && typeof req.body.location === 'string') {
+        try {
+            req.body.location = JSON.parse(req.body.location);
+        } catch (e) {
+            console.error("Failed to parse location JSON", e);
+        }
+    } else if (req.body['location[lat]']) {
         req.body.location = {
             lat: parseFloat(req.body['location[lat]']),
             lng: parseFloat(req.body['location[lng]']),
@@ -113,8 +133,13 @@ export const updateMemory = async (req, res) => {
     }
 
     // Parse tags
-    if (req.body['tags[]']) {
+    if (req.body.tags) {
+        req.body.tags = Array.isArray(req.body.tags) ? req.body.tags : [req.body.tags];
+    } else if (req.body['tags[]']) {
         req.body.tags = Array.isArray(req.body['tags[]']) ? req.body['tags[]'] : [req.body['tags[]']];
+    } else {
+        // If no tags are provided in the update, assume the user removed them (since frontend sends full state)
+        req.body.tags = [];
     }
 
     const memory = await Memory.findOneAndUpdate(
