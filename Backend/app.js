@@ -9,9 +9,14 @@ import "dotenv/config"
 const app = express()
 
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174", "https://trail-tales-chi.vercel.app"],
-    credentials: true
+    origin: ["http://localhost:5173", "http://localhost:5174", "https://trail-tales-chi.vercel.app", /\.vercel\.app$/],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Handle preflight requests explicitly
+app.options('*', cors());
 
 app.use(express.json())
 app.use(cookieParser())
