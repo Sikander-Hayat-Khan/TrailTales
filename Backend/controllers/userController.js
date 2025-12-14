@@ -64,3 +64,29 @@ export const getFriends = async (req, res) => {
     res.status(500).json({ msg: error.message });
   }
 };
+
+export const fixUserData = async (req, res) => {
+  try {
+    const users = await User.find({});
+    let fixedCount = 0;
+
+    for (const user of users) {
+      // Check if username looks like an email and email field is missing or empty
+      const isEmailUsername = user.username.includes("@");
+      const hasNoEmail = !user.email || user.email === "";
+
+      if (isEmailUsername && hasNoEmail) {
+        // Move username to email
+        user.email = user.username;
+        // Set username to the part before @
+        user.username = user.username.split("@")[0];
+        await user.save();
+        fixedCount++;
+      }
+    }
+
+    res.status(200).json({ msg: `Fixed ${fixedCount} users.` });
+  } catch (error) {
+    res.status(500).json({ msg: error.message });
+  }
+};

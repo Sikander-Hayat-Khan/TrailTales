@@ -38,6 +38,11 @@ const MemorySchema = new mongoose.Schema({
     type: String,
     enum: ['trip', 'pin', 'memory'],
     default: 'memory'
+  },
+  visibility: {
+    type: String,
+    enum: ['private', 'friends', 'public'],
+    default: 'private'
   }
 }, { timestamps: true });
 

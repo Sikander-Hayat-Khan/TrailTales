@@ -25,6 +25,8 @@ const Dashboard = ({
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedMemory, setSelectedMemory] = useState(null);
   const [memories, setMemories] = useState([]);
+  const [friendsMemories, setFriendsMemories] = useState([]);
+  const [showFriendsMemories, setShowFriendsMemories] = useState(false);
   
   // Delete Confirmation State
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -35,8 +37,12 @@ const Dashboard = ({
     if (user) {
       const fetchMemories = async () => {
         try {
-          const res = await api.get("/memories");
-          setMemories(res.data.memories);
+          const [myMemoriesRes, friendsMemoriesRes] = await Promise.all([
+            api.get("/memories"),
+            api.get("/memories/friends")
+          ]);
+          setMemories(myMemoriesRes.data.memories);
+          setFriendsMemories(friendsMemoriesRes.data.memories);
         } catch (error) {
           console.error("Failed to fetch memories", error);
         }
@@ -44,6 +50,7 @@ const Dashboard = ({
       fetchMemories();
     } else {
         setMemories([]);
+        setFriendsMemories([]);
     }
   }, [user]);
 
@@ -108,6 +115,7 @@ const Dashboard = ({
         formData.append("date", memoryData.date);
         formData.append("story", memoryData.story);
         formData.append("mood", memoryData.mood);
+        formData.append("visibility", memoryData.visibility || "private");
         
         // Append location (as JSON string or separate fields, backend expects object structure)
         // Mongoose can handle nested objects if sent as "location[lat]" etc.
@@ -215,6 +223,7 @@ const Dashboard = ({
             memory={selectedMemory}
             onEdit={handleEditMemory}
             onDelete={handleDeleteMemory}
+            currentUser={user}
           />
         )}
 
@@ -288,7 +297,10 @@ const Dashboard = ({
           isDashboardOpen={isDashboardOpen}
           onOpenMemory={handleOpenMemoryModal}
           onMemoryClick={handleViewMemory}
-          memories={memories}
+          memories={showFriendsMemories ? [...memories, ...friendsMemories] : memories}
+          user={user}
+          showFriendsMemories={showFriendsMemories}
+          setShowFriendsMemories={setShowFriendsMemories}
         />
       )}
 

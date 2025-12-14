@@ -1,13 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 
-const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, onMemoryClick, memories }) => {
+const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, onMemoryClick, memories, user, showFriendsMemories, setShowFriendsMemories }) => {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const activeViewRef = useRef(activeView);
   const onOpenMemoryRef = useRef(onOpenMemory);
   const onMemoryClickRef = useRef(onMemoryClick);
   const markersRef = useRef([]);
+  const userRef = useRef(user);
 
   // Search State
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,6 +28,10 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
   useEffect(() => {
     onMemoryClickRef.current = onMemoryClick;
   }, [onMemoryClick]);
+
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
   // Effect to handle map clicks and reset view
   useEffect(() => {
@@ -131,6 +136,18 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
 
     const pinIcon = mapInstanceRef.current.pinIcon;
 
+    // Define Friend Pin Icon
+    const friendPinIcon = L.divIcon({
+      className: "custom-pin-container",
+      html: `
+        <div class="friend-pin-pulse"></div>
+        <div class="friend-pin-core"></div>
+      `,
+      iconSize: [20, 20],
+      iconAnchor: [10, 10],
+      popupAnchor: [0, -10],
+    });
+
     memories.forEach((memory) => {
       // Handle both old format (coords array) and new format (location object)
       let lat, lng;
@@ -143,7 +160,14 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
         return; // Skip invalid memory
       }
 
-      const marker = L.marker([lat, lng], { icon: pinIcon })
+      // Determine if it's a friend's memory
+      const memoryUserId = typeof memory.userId === 'object' ? memory.userId._id : memory.userId;
+      const currentUserId = userRef.current?._id || userRef.current?.id;
+      const isFriendMemory = memoryUserId && currentUserId && memoryUserId !== currentUserId;
+      
+      const iconToUse = isFriendMemory ? friendPinIcon : pinIcon;
+
+      const marker = L.marker([lat, lng], { icon: iconToUse })
         .addTo(mapInstanceRef.current);
       
       // Add click handler to open view modal
@@ -156,7 +180,7 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
       
       markersRef.current.push(marker);
     });
-  }, [memories]);
+  }, [memories, user]);
 
   // Current Location Logic
 
@@ -255,6 +279,18 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
                         <i className="ph ph-x"></i>
                     </button>
                 )}
+                
+                <div style={{ width: '1px', height: '24px', background: '#e0e0e0', margin: '0 10px' }}></div>
+                
+                <button
+                    type="button"
+                    className={`friends-toggle-btn ${showFriendsMemories ? 'active' : ''}`}
+                    onClick={() => setShowFriendsMemories(!showFriendsMemories)}
+                    title={showFriendsMemories ? "Hide Friends' Memories" : "Show Friends' Memories"}
+                    aria-label="Toggle friends memories"
+                >
+                    <i className="ph ph-users"></i>
+                </button>
             </form>
             {searchResults.length > 0 && (
                 <div className="search-results" role="listbox">

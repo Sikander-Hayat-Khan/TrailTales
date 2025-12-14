@@ -1,5 +1,6 @@
 import express from "express";
 import userRouter from "./routes/userRouter.js";
+import friendRouter from "./routes/friendRouter.js";
 import cookieParser from "cookie-parser";
 import connect from "./db/connect.js";
 import cors from "cors";
@@ -17,6 +18,7 @@ app.use(cookieParser())
 app.use("/uploads", express.static("uploads"));
 
 app.use("/api",userRouter)
+app.use("/api/friends", friendRouter);
 
 async function start(){
     try {

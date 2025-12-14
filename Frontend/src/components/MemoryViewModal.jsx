@@ -1,7 +1,13 @@
 import React from "react";
 
-const MemoryViewModal = ({ isOpen, onClose, memory, onEdit, onDelete }) => {
+const MemoryViewModal = ({ isOpen, onClose, memory, onEdit, onDelete, currentUser }) => {
   if (!isOpen || !memory) return null;
+
+  const memoryOwnerId = typeof memory.userId === 'object' ? memory.userId._id : memory.userId;
+  const currentUserId = currentUser?._id || currentUser?.id;
+  const isOwner = memoryOwnerId === currentUserId;
+  
+  const author = typeof memory.userId === 'object' ? memory.userId : null;
 
   return (
     <div className="modal-overlay active" style={{ zIndex: 6000 }}>
@@ -15,14 +21,26 @@ const MemoryViewModal = ({ isOpen, onClose, memory, onEdit, onDelete }) => {
             <i className="ph ph-calendar-blank"></i>
             <span>{memory.date || "Unknown Date"}</span>
           </div>
-          <div className="view-actions">
-            <button className="delete-btn" onClick={() => onDelete(memory._id || memory.id)} title="Delete Memory">
-              <i className="ph ph-trash"></i>
-            </button>
-            <button className="edit-btn" onClick={() => onEdit(memory)}>
-              <i className="ph ph-pencil-simple"></i> Edit
-            </button>
-          </div>
+          
+          {isOwner ? (
+            <div className="view-actions">
+                <button className="delete-btn" onClick={() => onDelete(memory._id || memory.id)} title="Delete Memory">
+                <i className="ph ph-trash"></i>
+                </button>
+                <button className="edit-btn" onClick={() => onEdit(memory)}>
+                <i className="ph ph-pencil-simple"></i> Edit
+                </button>
+            </div>
+          ) : (
+             author && (
+                <div className="view-author-badge">
+                    <div className="author-avatar" style={{ backgroundColor: author.avatarColor || '#f28b50' }}>
+                        {author.username?.charAt(0).toUpperCase()}
+                    </div>
+                    <span>{author.username}</span>
+                </div>
+             )
+          )}
         </div>
 
         <div className="view-content">

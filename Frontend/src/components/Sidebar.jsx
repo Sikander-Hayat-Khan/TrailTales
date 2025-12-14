@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../api/axios";
+import "./FriendRequests.css";
 
 const Sidebar = ({
   activeView,
@@ -12,26 +13,33 @@ const Sidebar = ({
 }) => {
   const [showAddFriendInput, setShowAddFriendInput] = useState(false);
   const [newFriendName, setNewFriendName] = useState("");
+  const [friendRequests, setFriendRequests] = useState([]);
 
-  // Fetch friends on mount or user change
+  // Fetch friends and requests on mount or user change
   useEffect(() => {
     if (user) {
-        const fetchFriends = async () => {
+        const fetchData = async () => {
             try {
-                const res = await api.get("/friends");
-                setFriends(res.data.friends.map(f => ({
+                // Fetch Friends
+                const friendsRes = await api.get("/friends");
+                setFriends(friendsRes.data.friends.map(f => ({
                     id: f._id,
                     name: f.username,
                     status: f.bio || "Just joined",
                     avatarColor: f.avatarColor || "#f28b50"
                 })));
+
+                // Fetch Requests
+                const requestsRes = await api.get("/friends/requests");
+                setFriendRequests(requestsRes.data.requests);
             } catch (error) {
-                console.error("Failed to fetch friends", error);
+                console.error("Failed to fetch friends data", error);
             }
         };
-        fetchFriends();
+        fetchData();
     } else {
         setFriends([]);
+        setFriendRequests([]);
     }
   }, [user, setFriends]);
 
@@ -40,21 +48,58 @@ const Sidebar = ({
     if (!trimmedName) return;
 
     try {
-        const res = await api.post("/friends", { friendUsername: trimmedName });
-        const newFriend = {
-            id: crypto.randomUUID(), // Or use returned ID if available
-            name: res.data.friend.username,
-            status: res.data.friend.bio || "Just joined",
-            avatarColor: res.data.friend.avatarColor || "#f28b50"
-        };
-        setFriends([...friends, newFriend]);
+        // 1. Search for user
+        const searchRes = await api.get(`/friends/search?query=${trimmedName}`);
+        const users = searchRes.data.users;
+        
+        // Case-insensitive match or pick the first one if exact match fails
+        const targetUser = users.find(u => u.username.toLowerCase() === trimmedName.toLowerCase()) || users[0];
+        
+        if (!targetUser) {
+             handleToast("Error", "User not found", "error");
+             return;
+        }
+
+        // 2. Send Request
+        await api.post("/friends/request", { receiverId: targetUser._id });
+        
+        handleToast("Success", `Friend request sent to ${targetUser.username}!`, "success");
         setNewFriendName("");
         setShowAddFriendInput(false);
-        handleToast("Success", "Friend added successfully!", "success");
     } catch (error) {
-        const msg = error.response?.data?.msg || "Failed to add friend";
+        const msg = error.response?.data?.msg || "Failed to send request";
         handleToast("Error", msg, "error");
     }
+  };
+
+  const handleAcceptRequest = async (requestId) => {
+      try {
+          await api.post("/friends/accept", { requestId });
+          handleToast("Success", "Friend request accepted!", "success");
+          
+          // Refresh data
+          const friendsRes = await api.get("/friends");
+          setFriends(friendsRes.data.friends.map(f => ({
+              id: f._id,
+              name: f.username,
+              status: f.bio || "Just joined",
+              avatarColor: f.avatarColor || "#f28b50"
+          })));
+          
+          setFriendRequests(friendRequests.filter(r => r._id !== requestId));
+      } catch (error) {
+          handleToast("Error", "Failed to accept request", "error");
+      }
+  };
+
+  const handleRejectRequest = async (requestId) => {
+      try {
+          await api.post("/friends/reject", { requestId });
+          handleToast("Info", "Friend request rejected", "info");
+          setFriendRequests(friendRequests.filter(r => r._id !== requestId));
+      } catch (error) {
+          handleToast("Error", "Failed to reject request", "error");
+      }
   };
 
   return (
@@ -124,7 +169,7 @@ const Sidebar = ({
         }`}
       >
         <div className="panel-header-row">
-          <h4>Friends Online</h4>
+          <h4>Friends</h4>
           <button
             className="add-friend-btn"
             onClick={() => setShowAddFriendInput(!showAddFriendInput)}
@@ -151,6 +196,31 @@ const Sidebar = ({
               <i className="ph ph-check"></i>
             </button>
           </div>
+        )}
+
+        {friendRequests.length > 0 && (
+            <div className="friend-requests-section">
+                <h5>Friend Requests</h5>
+                {friendRequests.map(req => (
+                    <div key={req._id} className="friend-request-item">
+                        <div className="req-info">
+                            <div className="friend-avatar small" style={{ background: req.sender.avatarColor }}>
+                                {req.sender.username.charAt(0).toUpperCase()}
+                            </div>
+                            <span>{req.sender.username}</span>
+                        </div>
+                        <div className="req-actions">
+                            <button className="accept-btn" onClick={() => handleAcceptRequest(req._id)}>
+                                <i className="ph ph-check"></i>
+                            </button>
+                            <button className="reject-btn" onClick={() => handleRejectRequest(req._id)}>
+                                <i className="ph ph-x"></i>
+                            </button>
+                        </div>
+                    </div>
+                ))}
+                <div className="divider"></div>
+            </div>
         )}
 
         <div className="friends-list-container">

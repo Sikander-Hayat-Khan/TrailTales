@@ -2569,3 +2569,82 @@ input:checked + .slider:before { transform: translateX(22px); }
   color: #fff;
 }
 
+
+/* Friend Pin Styles */
+.friend-pin-core {
+  width: 12px;
+  height: 12px;
+  background-color: #3498db; /* Blue */
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+
+.friend-pin-pulse {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(52, 152, 219, 0.4); /* Blue with opacity */
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  animation: pulse 2s infinite;
+  z-index: 1;
+}
+
+
+.map-search-container .friends-toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9aa0a6;
+  font-size: 1.3rem;
+  transition: all 0.2s;
+}
+
+.map-search-container .friends-toggle-btn:hover {
+  color: #3498db;
+  transform: scale(1.1);
+}
+
+.map-search-container .friends-toggle-btn.active {
+  color: #3498db;
+}
+
+
+.view-author-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(52, 152, 219, 0.1);
+  padding: 5px 15px 5px 5px;
+  border-radius: 30px;
+  border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.view-author-badge .author-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: white;
+  font-size: 0.9rem;
+}
+
+.view-author-badge span {
+  color: #3498db;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+

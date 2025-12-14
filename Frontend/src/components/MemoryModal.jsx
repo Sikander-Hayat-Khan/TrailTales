@@ -13,6 +13,7 @@ const MemoryModal = ({ isOpen, onClose, location, onSave, initialData }) => {
   });
   const [story, setStory] = useState(initialData?.story || "");
   const [mood, setMood] = useState(initialData?.mood || "happy");
+  const [visibility, setVisibility] = useState(initialData?.visibility || "private");
   const [tags, setTags] = useState(initialData?.tags ? initialData.tags.join(", ") : "");
   const [images, setImages] = useState(initialData?.images || []); // Preview URLs
   const [imageFiles, setImageFiles] = useState([]); // Actual File objects
@@ -46,6 +47,7 @@ const MemoryModal = ({ isOpen, onClose, location, onSave, initialData }) => {
       date,
       story,
       mood,
+      visibility,
       tags: tags.split(",").map(t => t.trim()).filter(t => t),
       images, // These are previews/existing URLs
       imageFiles // These are new files to upload
@@ -141,6 +143,20 @@ const MemoryModal = ({ isOpen, onClose, location, onSave, initialData }) => {
                 onChange={(e) => setTags(e.target.value)}
               />
             </div>
+          </div>
+
+          <div className="form-group">
+            <label>Visibility</label>
+            <select 
+              value={visibility} 
+              onChange={(e) => setVisibility(e.target.value)}
+              className="visibility-select"
+              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #384959', background: '#1e2330', color: '#fff' }}
+            >
+              <option value="private">🔒 Private (Only Me)</option>
+              <option value="friends">👥 Friends Only</option>
+              <option value="public">🌍 Public (Everyone)</option>
+            </select>
           </div>
 
           <div className="form-group">
