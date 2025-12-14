@@ -24,12 +24,15 @@ async function login(req,res){
         }
         const token = user.createJWT()
         
-        const isProduction = process.env.NODE_ENV === 'production';
+        // Determine if we are in a secure environment (HTTPS)
+        // Render/Vercel use HTTPS, so this will be true in production.
+        // Localhost usually uses HTTP, so this will be false.
+        const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
 
         res.cookie("token",token,{
             httpOnly: true,
-            sameSite: isProduction ? "none" : "lax",
-            secure: isProduction,
+            sameSite: isSecure ? "none" : "lax",
+            secure: isSecure,
             expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
         })
         return res.status(200).json({msg: "User logged in", user})
@@ -56,12 +59,12 @@ async function signup(req,res){
         const user = await User.create({username, email, password})
         const token = user.createJWT()
         
-        const isProduction = process.env.NODE_ENV === 'production';
+        const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
         
         res.cookie("token",token,{
             httpOnly: true,
-            sameSite: isProduction ? "none" : "lax",
-            secure: isProduction,
+            sameSite: isSecure ? "none" : "lax",
+            secure: isSecure,
             expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
         })
         
@@ -73,12 +76,12 @@ async function signup(req,res){
 }
 
 async function logout(req,res){
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
 
     res.clearCookie("token",{
         httpOnly: true,
-        sameSite: isProduction ? "none" : "lax",
-        secure: isProduction
+        sameSite: isSecure ? "none" : "lax",
+        secure: isSecure
     })
     return res.status(200).json({msg: "User logged out"})
 }
