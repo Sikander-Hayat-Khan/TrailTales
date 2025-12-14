@@ -44,20 +44,16 @@ const Dashboard = ({
           ]);
           setMemories(myMemoriesRes.data.memories);
           setFriendsMemories(friendsMemoriesRes.data.memories);
-        } catch (error) {
-          console.error("Failed to fetch memories", error);
+        } catch {
+          console.error("Failed to fetch memories");
         }
       };
       fetchMemories();
-    }
-  }, [user]);
-
-  // Clear memories when user logs out
-  useEffect(() => {
-    if (!user) {
+    } 
+    return () => {
       setMemories([]);
       setFriendsMemories([]);
-    }
+    };
   }, [user]);
 
   const switchView = (viewName) => {
@@ -195,7 +191,7 @@ const Dashboard = ({
           setMemoryToDelete(null);
           handleToast("Success", "Memory deleted successfully", "success");
       } catch (error) {
-          handleToast("Error", "Failed to delete memory", "error");
+          handleToast("Error", "Failed to delete memory", error.message);
       }
     }
   };

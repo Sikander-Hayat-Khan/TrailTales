@@ -2,6 +2,7 @@ import User from "../models/User.js"
 import bcrypt from "bcryptjs"
 
 async function login(req,res){
+    console.log("Login Request Body:", req.body);
     const username = req.body.username
     const password = req.body.password
     if (!username){
@@ -17,17 +18,20 @@ async function login(req,res){
         });
         
         if(!user){
+            console.log("User not found for:", username);
             return res.status(400).json({msg: "User does not exist"})
         }
         if (!(await bcrypt.compare(password,user.password))){
+            console.log("Incorrect password for:", username);
             return res.status(401).json({msg: "Incorrect password"})
         }
         const token = user.createJWT()
         
         // Determine if we are in a secure environment (HTTPS)
-        // Render/Vercel use HTTPS, so this will be true in production.
-        // Localhost usually uses HTTP, so this will be false.
-        const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
+        const isProduction = process.env.NODE_ENV === 'production';
+        const isSecure = isProduction || req.secure || req.headers['x-forwarded-proto'] === 'https';
+        
+        console.log("Login Successful. Secure:", isSecure, "Env:", process.env.NODE_ENV);
 
         res.cookie("token",token,{
             httpOnly: true,
@@ -37,12 +41,13 @@ async function login(req,res){
         })
         return res.status(200).json({msg: "User logged in", user})
     } catch (error) {
-        console.log(error)
+        console.log("Login Error:", error)
         return res.status(400).json({msg: "Error logging in"})
     }
 }
 
 async function signup(req,res){
+    console.log("Signup Request Body:", req.body);
     const { username, email, password } = req.body;
     
     if (!username || !email || !password){
@@ -53,13 +58,17 @@ async function signup(req,res){
         // Check if user already exists
         const existingUser = await User.findOne({ $or: [{ username }, { email }] });
         if (existingUser) {
+            console.log("User already exists:", username, email);
             return res.status(400).json({ msg: "User with this username or email already exists" });
         }
 
         const user = await User.create({username, email, password})
         const token = user.createJWT()
         
-        const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
+        const isProduction = process.env.NODE_ENV === 'production';
+        const isSecure = isProduction || req.secure || req.headers['x-forwarded-proto'] === 'https';
+        
+        console.log("Signup Successful. Secure:", isSecure, "Env:", process.env.NODE_ENV);
         
         res.cookie("token",token,{
             httpOnly: true,
@@ -76,7 +85,8 @@ async function signup(req,res){
 }
 
 async function logout(req,res){
-    const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isSecure = isProduction || req.secure || req.headers['x-forwarded-proto'] === 'https';
 
     res.clearCookie("token",{
         httpOnly: true,
