@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from "react";
 import api from "../api/axios";
+import Chat from "./Chat";
 import "./FriendRequests.css";
 
 const Sidebar = ({
   activeView,
   friends,
   setFriends,
-  chatTitle,
+  // chatTitle,
   openChatWith,
   handleToast,
-  user
+  user,
+  selectedFriend
 }) => {
   const [showAddFriendInput, setShowAddFriendInput] = useState(false);
   const [newFriendName, setNewFriendName] = useState("");
@@ -17,30 +19,47 @@ const Sidebar = ({
 
   // Fetch friends and requests on mount or user change
   useEffect(() => {
+    let isMounted = true;
     if (user) {
         const fetchData = async () => {
             try {
                 // Fetch Friends
                 const friendsRes = await api.get("/friends");
-                setFriends(friendsRes.data.friends.map(f => ({
-                    id: f._id,
-                    name: f.username,
-                    status: f.bio || "Just joined",
-                    avatarColor: f.avatarColor || "#f28b50"
-                })));
+                if (isMounted) {
+                    setFriends(friendsRes.data.friends.map(f => ({
+                        id: f._id,
+                        name: f.username,
+                        status: f.bio || "Just joined",
+                        avatarColor: f.avatarColor || "#f28b50"
+                    })));
+                }
 
                 // Fetch Requests
                 const requestsRes = await api.get("/friends/requests");
-                setFriendRequests(requestsRes.data.requests);
+                if (isMounted) {
+                    setFriendRequests(requestsRes.data.requests);
+                }
             } catch (error) {
                 console.error("Failed to fetch friends data", error);
             }
         };
         fetchData();
-    } else {
+        
+        // Poll for updates every 5 seconds to keep friend list in sync
+        const interval = setInterval(fetchData, 5000);
+        return () => {
+            isMounted = false;
+            clearInterval(interval);
+            setFriends([]);
+            setFriendRequests([]);
+        };
+    }
+    
+    return () => {
+        isMounted = false;
         setFriends([]);
         setFriendRequests([]);
-    }
+    };
   }, [user, setFriends]);
 
   const handleAddFriend = async () => {
@@ -88,7 +107,7 @@ const Sidebar = ({
           
           setFriendRequests(friendRequests.filter(r => r._id !== requestId));
       } catch (error) {
-          handleToast("Error", "Failed to accept request", "error");
+          handleToast("Error", "Failed to accept request", error.message);
       }
   };
 
@@ -98,7 +117,7 @@ const Sidebar = ({
           handleToast("Info", "Friend request rejected", "info");
           setFriendRequests(friendRequests.filter(r => r._id !== requestId));
       } catch (error) {
-          handleToast("Error", "Failed to reject request", "error");
+          handleToast("Error", "Failed to reject request", error.message);
       }
   };
 
@@ -245,7 +264,7 @@ const Sidebar = ({
 
                 <button
                   className="msg-icon-btn"
-                  onClick={() => openChatWith(friend.name)}
+                  onClick={() => openChatWith(friend)}
                   aria-label={`Chat with ${friend.name}`}
                 >
                   <i className="ph ph-chat-circle-dots"></i>
@@ -263,63 +282,7 @@ const Sidebar = ({
           activeView === "chat" ? "active-section" : ""
         }`}
       >
-        <h4 id="chat-header-title">{chatTitle}</h4>
-        <div className="chat-messages" id="chat-box">
-          {/* Messages will appear here */}
-        </div>
-        <div className="chat-input-area">
-          <input 
-            type="text" 
-            placeholder="Type a message..." 
-            aria-label="Type a message"
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                const msg = e.target.value;
-                if (msg.trim()) {
-                  const chatBox = document.getElementById('chat-box');
-                  const msgDiv = document.createElement('div');
-                  msgDiv.className = 'message sent';
-                  msgDiv.textContent = msg;
-                  msgDiv.style.alignSelf = 'flex-end';
-                  msgDiv.style.background = '#f28b50';
-                  msgDiv.style.color = 'white';
-                  msgDiv.style.padding = '8px 12px';
-                  msgDiv.style.borderRadius = '12px';
-                  msgDiv.style.marginBottom = '8px';
-                  msgDiv.style.maxWidth = '70%';
-                  chatBox.appendChild(msgDiv);
-                  e.target.value = '';
-                  chatBox.scrollTop = chatBox.scrollHeight;
-                }
-              }
-            }}
-          />
-          <button 
-            className="send-btn" 
-            aria-label="Send message"
-            onClick={() => {
-            const input = document.querySelector('.chat-input-area input');
-            const msg = input.value;
-            if (msg.trim()) {
-              const chatBox = document.getElementById('chat-box');
-              const msgDiv = document.createElement('div');
-              msgDiv.className = 'message sent';
-              msgDiv.textContent = msg;
-              msgDiv.style.alignSelf = 'flex-end';
-              msgDiv.style.background = '#f28b50';
-              msgDiv.style.color = 'white';
-              msgDiv.style.padding = '8px 12px';
-              msgDiv.style.borderRadius = '12px';
-              msgDiv.style.marginBottom = '8px';
-              msgDiv.style.maxWidth = '70%';
-              chatBox.appendChild(msgDiv);
-              input.value = '';
-              chatBox.scrollTop = chatBox.scrollHeight;
-            }
-          }}>
-            <i className="ph ph-paper-plane-right"></i>
-          </button>
-        </div>
+        {activeView === "chat" && <Chat user={user} selectedFriend={selectedFriend} />}
       </div>
     </aside>
   );

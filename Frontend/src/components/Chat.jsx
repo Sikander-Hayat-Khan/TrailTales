@@ -6,24 +6,28 @@ const Chat = ({ user, selectedFriend }) => {
   const [newMessage, setNewMessage] = useState("");
   const chatBoxRef = useRef(null);
 
-  // Fetch messages
-  const fetchMessages = async () => {
-    if (!selectedFriend || !selectedFriend.id) return;
-    try {
-      const res = await api.get(`/messages/${selectedFriend.id}`);
-      setMessages(res.data.messages);
-    } catch (error) {
-      console.error("Failed to fetch messages", error);
-    }
-  };
-
   // Initial fetch and polling
   useEffect(() => {
-    (async () => {
-      await fetchMessages();
-    })();
+    let isMounted = true;
+    // Fetch messages
+    const fetchMessages = async () => {
+      if (!selectedFriend || !selectedFriend.id) return;
+      try {
+        const res = await api.get(`/messages/${selectedFriend.id}`);
+        if (isMounted) {
+            setMessages(res.data.messages);
+        }
+      } catch (error) {
+        console.error("Failed to fetch messages", error);
+      }
+    };
+
+    fetchMessages();
     const interval = setInterval(fetchMessages, 3000); // Poll every 3 seconds
-    return () => clearInterval(interval);
+    return () => {
+        isMounted = false;
+        clearInterval(interval);
+    };
   }, [selectedFriend]);
 
   // Scroll to bottom on new messages
