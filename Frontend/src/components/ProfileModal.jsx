@@ -13,8 +13,7 @@ const ProfileModal = ({ isOpen, onClose, user, setUser, handleToast }) => {
         setIsEditing(false);
         handleToast("Success", "Profile updated successfully", "success");
     } catch (error) {
-        const errorMsg = error.response?.data?.msg || error.message;
-        handleToast("Error", "Failed to update profile", errorMsg);
+        handleToast("Error", "Failed to update profile", error.message);
     }
   };
 

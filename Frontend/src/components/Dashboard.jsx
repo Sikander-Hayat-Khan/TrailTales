@@ -38,30 +38,6 @@ const Dashboard = ({
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [memoryToDelete, setMemoryToDelete] = useState(null);
 
-  // Search State
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) {
-        // If empty, reload all memories
-        try {
-            const res = await api.get("/memories");
-            setMemories(res.data.memories);
-        } catch (error) {
-            console.error("Failed to reload memories");
-        }
-        return;
-    }
-    try {
-        const res = await api.get(`/memories/search?q=${encodeURIComponent(searchQuery)}`);
-        setMemories(res.data.memories);
-        handleToast("Search", `Found ${res.data.memories.length} memories`, "success");
-    } catch (error) {
-        handleToast("Error", "Search failed", "error");
-    }
-  };
-
   // Fetch Memories on Mount or User Change
   useEffect(() => {
     if (user) {
@@ -281,21 +257,6 @@ const Dashboard = ({
 
   return (
     <section id="dashboard-view" className={isDashboardOpen ? "active" : ""}>
-      
-      {/* Search Bar for Little Language Verification */}
-      <div style={{ position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 1000, background: 'white', padding: '10px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px' }}>
-            <input 
-                type="text" 
-                placeholder="Search (e.g. tag:nature)" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', width: '250px' }}
-            />
-            <button type="submit" style={{ padding: '8px 15px', background: '#f28b50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Search</button>
-        </form>
-      </div>
-
       <Suspense fallback={null}>
         {isMemoryModalOpen && (
           <MemoryModal 
