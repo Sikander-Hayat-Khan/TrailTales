@@ -1,5 +1,7 @@
 import User from "../models/User.js";
 import Memory from "../models/Memory.js";
+import { assert, sanitizeObject } from "../utils/helpers.js";
+import { USER_CONFIG } from "../config/constants.js";
 
 export const getProfile = async (req, res) => {
   try {
@@ -18,15 +20,48 @@ export const getProfile = async (req, res) => {
       pinsCount
     };
 
-    res.status(200).json({ user: userWithStats });
+    // Recursion: Sanitize the output object
+    const sanitizedUser = sanitizeObject(userWithStats);
+
+    res.status(200).json({ user: sanitizedUser });
   } catch (error) {
     res.status(500).json({ msg: error.message });
   }
 };
 
+/**
+ * Updates the user profile.
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} req.body - The body of the request.
+ * @param {string} [req.body.bio] - The new bio.
+ * @param {string} [req.body.avatarColor] - The new avatar color.
+ * @param {Object} res - The response object.
+ * 
+ * @pre req.user.userID must be a valid user ID.
+ * @pre If bio is provided, it must not exceed MAX_BIO_LENGTH.
+ * @post The user's profile is updated in the database.
+ */
 export const updateProfile = async (req, res) => {
   try {
     const { bio, avatarColor } = req.body;
+
+    // Debugging: Assertion to ensure userID exists (should be handled by auth middleware, but good for defensive programming)
+    assert(req.user && req.user.userID, "User ID missing in request");
+
+    // Specifications: Precondition check
+    if (bio && bio.length > USER_CONFIG.MAX_BIO_LENGTH) {
+        return res.status(400).json({ msg: `Bio cannot exceed ${USER_CONFIG.MAX_BIO_LENGTH} characters` });
+    }
+
+    // Regex: Validate Hex Color Code if avatarColor is provided
+    if (avatarColor) {
+        const hexColorRegex = /^#([0-9A-F]{3}){1,2}$/i;
+        if (!hexColorRegex.test(avatarColor)) {
+             return res.status(400).json({ msg: "Invalid color format. Must be a hex code." });
+        }
+    }
+
     const user = await User.findByIdAndUpdate(
       req.user.userID,
       { bio, avatarColor },
@@ -34,6 +69,8 @@ export const updateProfile = async (req, res) => {
     ).select("-password");
     res.status(200).json({ user });
   } catch (error) {
+    // Debugging: Log the error for analysis
+    console.error("Update Profile Error:", error);
     res.status(500).json({ msg: error.message });
   }
 };

@@ -65,9 +65,11 @@ export const acceptFriendRequest = async (req, res) => {
     request.status = "accepted";
     await request.save();
 
-    // Add to friends list for both users
-    await User.findByIdAndUpdate(request.sender, { $addToSet: { friends: request.receiver } });
-    await User.findByIdAndUpdate(request.receiver, { $addToSet: { friends: request.sender } });
+    // Concurrency: Update both users' friend lists in parallel
+    await Promise.all([
+        User.findByIdAndUpdate(request.sender, { $addToSet: { friends: request.receiver } }),
+        User.findByIdAndUpdate(request.receiver, { $addToSet: { friends: request.sender } })
+    ]);
 
     res.status(200).json({ msg: "Friend request accepted" });
   } catch (error) {
