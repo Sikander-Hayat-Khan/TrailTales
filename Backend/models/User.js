@@ -34,7 +34,16 @@ const UserSchema = new mongoose.Schema({
     friends: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-    }]
+    }],
+    isLocationShared: {
+        type: Boolean,
+        default: false
+    },
+    lastLocation: {
+        lat: Number,
+        lng: Number,
+        timestamp: Date
+    }
 })
 UserSchema.pre("save",async function(){
     if (!this.isModified('password')) return;

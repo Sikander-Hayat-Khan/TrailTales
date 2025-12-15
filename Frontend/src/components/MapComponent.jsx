@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import L from "leaflet";
+import api from "../api/axios";
 
 const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, onMemoryClick, memories, user, showFriendsMemories, setShowFriendsMemories }) => {
   const mapContainerRef = useRef(null);
@@ -8,6 +9,7 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
   const onOpenMemoryRef = useRef(onOpenMemory);
   const onMemoryClickRef = useRef(onMemoryClick);
   const markersRef = useRef([]);
+  const friendLocationMarkersRef = useRef([]); // New ref for friend location markers
   const userRef = useRef(user);
 
   // Search State
@@ -15,6 +17,80 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
+  const [friendsLocations, setFriendsLocations] = useState([]); // State for friends' live locations
+
+  // Poll for friends' locations if toggle is on
+  useEffect(() => {
+      let interval;
+      if (showFriendsMemories && user) {
+          const fetchLocations = async () => {
+              try {
+                  const res = await api.get("/friends");
+                  // Filter friends who are sharing location and have a valid location
+                  const locations = res.data.friends
+                      .filter(f => f.isLocationShared && f.lastLocation && f.lastLocation.lat)
+                      .map(f => ({
+                          id: f._id,
+                          username: f.username,
+                          avatarColor: f.avatarColor,
+                          lat: f.lastLocation.lat,
+                          lng: f.lastLocation.lng,
+                          timestamp: f.lastLocation.timestamp
+                      }));
+                  setFriendsLocations(locations);
+              } catch (error) {
+                  console.error("Failed to fetch friend locations", error);
+              }
+          };
+          
+          fetchLocations();
+          interval = setInterval(fetchLocations, 10000); // Poll every 10s
+      } else {
+          setFriendsLocations([]);
+      }
+      return () => clearInterval(interval);
+  }, [showFriendsMemories, user]);
+
+  // Render Friend Location Markers
+  useEffect(() => {
+      if (!mapInstanceRef.current) return;
+
+      // Clear existing location markers
+      friendLocationMarkersRef.current.forEach(marker => marker.remove());
+      friendLocationMarkersRef.current = [];
+
+      friendsLocations.forEach(friend => {
+          const icon = L.divIcon({
+              className: "friend-location-pin",
+              html: `
+                <div style="
+                    background-color: ${friend.avatarColor || '#3498db'};
+                    width: 30px; height: 30px; border-radius: 50%; border: 2px solid white;
+                    display: flex; align-items: center; justify-content: center;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+                    color: white; font-weight: bold; font-size: 12px;
+                ">
+                    ${friend.username.charAt(0).toUpperCase()}
+                </div>
+                <div style="
+                    position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
+                    width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent;
+                    border-top: 6px solid white;
+                "></div>
+              `,
+              iconSize: [30, 36],
+              iconAnchor: [15, 36],
+              popupAnchor: [0, -36]
+          });
+
+          const marker = L.marker([friend.lat, friend.lng], { icon })
+              .addTo(mapInstanceRef.current)
+              .bindPopup(`<b>${friend.username}</b><br>Last seen: ${new Date(friend.timestamp).toLocaleTimeString()}`);
+          
+          friendLocationMarkersRef.current.push(marker);
+      });
+
+  }, [friendsLocations]);
 
   // Keep refs in sync with props
   useEffect(() => {
@@ -195,8 +271,20 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
 
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const { latitude, longitude } = position.coords;
+        
+        // If user has location sharing on, update backend
+        if (userRef.current?.isLocationShared) {
+            try {
+                await api.patch("/profile", { 
+                    location: { lat: latitude, lng: longitude } 
+                });
+            } catch (e) {
+                console.error("Failed to update live location", e);
+            }
+        }
+
         if (mapInstanceRef.current) {
           mapInstanceRef.current.flyTo([latitude, longitude], 16, {
             duration: 2,

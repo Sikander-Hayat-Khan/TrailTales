@@ -48,7 +48,7 @@ export const getProfile = async (req, res) => {
  */
 export const updateProfile = async (req, res) => {
   try {
-    const { bio, avatarColor } = req.body;
+    const { bio, avatarColor, isLocationShared, location } = req.body;
 
     // Debugging: Assertion to ensure userID exists (should be handled by auth middleware, but good for defensive programming)
     assert(req.user && req.user.userID, "User ID missing in request");
@@ -66,9 +66,13 @@ export const updateProfile = async (req, res) => {
         }
     }
 
+    const updateData = { bio, avatarColor };
+    if (typeof isLocationShared !== 'undefined') updateData.isLocationShared = isLocationShared;
+    if (location) updateData.lastLocation = { ...location, timestamp: new Date() };
+
     const user = await User.findByIdAndUpdate(
       req.user.userID,
-      { bio, avatarColor },
+      updateData,
       { new: true, runValidators: true }
     ).select("-password");
     res.status(200).json({ user });
