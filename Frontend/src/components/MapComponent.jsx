@@ -239,7 +239,9 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
       // Determine if it's a friend's memory
       const memoryUserId = typeof memory.userId === 'object' ? memory.userId._id : memory.userId;
       const currentUserId = userRef.current?._id || userRef.current?.id;
-      const isFriendMemory = memoryUserId && currentUserId && memoryUserId !== currentUserId;
+      
+      // Robust comparison using String() to handle ObjectId vs String mismatches
+      const isFriendMemory = memoryUserId && currentUserId && String(memoryUserId) !== String(currentUserId);
       
       const iconToUse = isFriendMemory ? friendPinIcon : pinIcon;
 
