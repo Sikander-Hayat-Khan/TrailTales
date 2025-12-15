@@ -5,6 +5,11 @@ const ProfileModal = ({ isOpen, onClose, user, setUser, handleToast }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [bio, setBio] = useState(user?.bio || "Just a traveler exploring the world one pin at a time.");
   const [avatarColor, setAvatarColor] = useState(user?.avatarColor || "#f28b50");
+  const [isLocationShared, setIsLocationShared] = useState(user?.isLocationShared || false);
+
+  const toggleLocationSharing = () => {
+    setIsLocationShared(!isLocationShared);
+  };
 
   const handleSave = async () => {
     try {
@@ -67,7 +72,7 @@ const ProfileModal = ({ isOpen, onClose, user, setUser, handleToast }) => {
                     backgroundColor: isLocationShared ? '#f28b50' : '#ccc', transition: '.4s', borderRadius: '34px' 
                 }}>
                     <span style={{ 
-                        position: 'absolute', content: "", height: '16px', width: '16px', left: '4px', bottom: '4px', 
+                        position: 'absolute', height: '16px', width: '16px', left: '4px', bottom: '4px', 
                         backgroundColor: 'white', transition: '.4s', borderRadius: '50%',
                         transform: isLocationShared ? 'translateX(26px)' : 'translateX(0)'
                     }}></span>
