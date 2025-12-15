@@ -93,7 +93,7 @@ const Chat = ({ user, selectedFriend }) => {
         style={{ flex: 1, overflowY: 'auto', padding: '10px' }}
       >
         {messages.map((msg, index) => {
-          const isMe = msg.sender._id === user._id || msg.sender === user._id;
+          const isMe = String(msg.sender._id || msg.sender) === String(user._id || user.id);
           return (
             <div 
               key={msg._id || index} 
