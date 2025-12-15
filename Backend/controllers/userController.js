@@ -20,12 +20,8 @@ export const getProfile = async (req, res) => {
       pinsCount
     };
 
-    // Convert to plain JSON object to ensure ObjectIds are strings before sanitization
-    // This prevents the recursive sanitizer from corrupting ObjectId instances
-    const userJson = JSON.parse(JSON.stringify(userWithStats));
-
     // Recursion: Sanitize the output object
-    const sanitizedUser = sanitizeObject(userJson);
+    const sanitizedUser = sanitizeObject(userWithStats);
 
     res.status(200).json({ user: sanitizedUser });
   } catch (error) {

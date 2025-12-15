@@ -33,14 +33,7 @@ const Chat = ({ user, selectedFriend }) => {
   // Scroll to bottom on new messages
   useEffect(() => {
     if (chatBoxRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } = chatBoxRef.current;
-      // Only scroll if user is already near the bottom or if it's the first load (messages just populated)
-      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
-      
-      // If messages length changed significantly (initial load) or user is near bottom
-      if (isNearBottom || messages.length > 0 && scrollTop === 0) {
-          chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
-      }
+      chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
     }
   }, [messages]);
 

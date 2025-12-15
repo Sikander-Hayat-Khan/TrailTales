@@ -53,29 +53,6 @@ const ProfileModal = ({ isOpen, onClose, user, setUser, handleToast }) => {
             <span>Pins</span>
           </div>
         </div>
-
-        <div className="location-toggle-container" style={{ margin: '15px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-            <label className="switch" style={{ position: 'relative', display: 'inline-block', width: '50px', height: '24px' }}>
-                <input 
-                  type="checkbox" 
-                  checked={isLocationShared} 
-                  onChange={toggleLocationSharing}
-                  style={{ opacity: 0, width: 0, height: 0 }}
-                />
-                <span className="slider round" style={{ 
-                    position: 'absolute', cursor: 'pointer', top: 0, left: 0, right: 0, bottom: 0, 
-                    backgroundColor: isLocationShared ? '#f28b50' : '#ccc', transition: '.4s', borderRadius: '34px' 
-                }}>
-                    <span style={{ 
-                        position: 'absolute', content: "", height: '16px', width: '16px', left: '4px', bottom: '4px', 
-                        backgroundColor: 'white', transition: '.4s', borderRadius: '50%',
-                        transform: isLocationShared ? 'translateX(26px)' : 'translateX(0)'
-                    }}></span>
-                </span>
-            </label>
-            <span style={{ fontSize: '0.9rem' }}>Share Live Location</span>
-        </div>
-
         <div className="modal-bio">
           <label>Bio</label>
           {isEditing ? (
