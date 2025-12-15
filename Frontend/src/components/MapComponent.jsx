@@ -237,9 +237,17 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
       }
 
       // Determine if it's a friend's memory
-      const memoryUserId = typeof memory.userId === 'object' ? memory.userId._id : memory.userId;
-      const currentUserId = userRef.current?._id || userRef.current?.id;
-      const isFriendMemory = memoryUserId && currentUserId && String(memoryUserId) !== String(currentUserId);
+      let isFriendMemory = false;
+      
+      // If userId is an object (populated), check IDs.
+      // If userId is a string (not populated), it comes from 'getAllMemories' or 'searchMemories' which are user-scoped, so it's MINE.
+      if (memory.userId && typeof memory.userId === 'object') {
+          const memoryUserId = memory.userId._id || memory.userId.id;
+          const currentUserId = userRef.current?._id || userRef.current?.id;
+          if (memoryUserId && currentUserId) {
+              isFriendMemory = String(memoryUserId) !== String(currentUserId);
+          }
+      }
       
       const iconToUse = isFriendMemory ? friendPinIcon : pinIcon;
 
