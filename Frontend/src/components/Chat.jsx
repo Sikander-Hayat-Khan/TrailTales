@@ -93,13 +93,18 @@ const Chat = ({ user, selectedFriend }) => {
         style={{ flex: 1, overflowY: 'auto', padding: '10px' }}
       >
         {messages.map((msg, index) => {
-          const isMe = String(msg.sender._id || msg.sender) === String(user._id || user.id);
+          const senderId = msg.sender?._id || msg.sender;
+          const currentUserId = user?._id || user?.id;
+          const isMe = String(senderId) === String(currentUserId);
+          
           return (
             <div 
               key={msg._id || index} 
               className={`message ${isMe ? 'sent' : 'received'}`}
               style={{
                 alignSelf: isMe ? 'flex-end' : 'flex-start',
+                backgroundColor: isMe ? '#f28b50' : '#2a2f3d',
+                color: '#fff',
                 padding: '8px 12px',
                 borderRadius: '12px',
                 marginBottom: '8px',

@@ -1048,7 +1048,7 @@ nav {
 .chat-messages::-webkit-scrollbar { width: 4px; }
 .chat-messages::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
 
-.message, .msg { 
+.msg { 
   padding: 14px 18px; 
   border-radius: 18px; 
   font-size: 0.95rem; 
@@ -1058,16 +1058,14 @@ nav {
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
-.chat-messages .message.received,
-.chat-messages .msg.received { 
+.received { 
   background: #e0e0e0; 
   color: #000000; 
   border-bottom-left-radius: 4px; 
   border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.chat-messages .message.sent,
-.chat-messages .msg.sent { 
+.sent { 
   background: #f28b50; 
   color: #fff; 
   align-self: flex-end; 
