@@ -13,7 +13,7 @@ import ToastContainer from "./components/ToastContainer";
 // Lazy Loading Dashboard
 const Dashboard = lazy(() => import("./components/Dashboard"));
 
-// Images
+// loading Images
 import bookLogo from "./assets/book.png";
 
 function App() {
