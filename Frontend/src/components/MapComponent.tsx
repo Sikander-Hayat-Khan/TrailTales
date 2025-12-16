@@ -18,6 +18,7 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
   const [isSearching, setIsSearching] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [friendsLocations, setFriendsLocations] = useState<any[]>([]); // State for friends' live locations
+  const [filteredMemories, setFilteredMemories] = useState<any[] | null>(null); // State for search results
 
   // Poll for friends' locations if toggle is on
   useEffect(() => {
@@ -204,7 +205,8 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
 
   // Update markers when memories change
   useEffect(() => {
-    if (!mapInstanceRef.current || !memories) return;
+    const memoriesToDisplay = filteredMemories || memories;
+    if (!mapInstanceRef.current || !memoriesToDisplay) return;
     
     // Clear existing markers
     markersRef.current.forEach(marker => marker.remove());
@@ -224,7 +226,7 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
       popupAnchor: [0, -10],
     });
 
-    memories.forEach((memory: any) => {
+    memoriesToDisplay.forEach((memory: any) => {
       // Handle both old format (coords array) and new format (location object)
       let lat, lng;
       if (memory.location && typeof memory.location === 'object') {
@@ -264,7 +266,7 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
       
       markersRef.current.push(marker);
     });
-  }, [memories, user]);
+  }, [memories, filteredMemories, user]);
 
   // Current Location Logic
 
@@ -309,16 +311,42 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
   // Search Logic
   const handleSearch = async (e: any) => {
     e.preventDefault();
-    if (!searchQuery.trim()) return;
+    if (!searchQuery.trim()) {
+        setFilteredMemories(null);
+        setSearchResults([]);
+        return;
+    }
     
     setIsSearching(true);
+    
+    // Check if it's a "Little Language" query (contains tag:, mood:, or quotes)
+    const isLittleLanguage = searchQuery.includes("tag:") || searchQuery.includes("mood:") || searchQuery.includes('"');
+
     try {
-        const apiKey = "v4vwdmxWVeQdVFt5xcEl";
-        const response = await fetch(
-            `https://api.maptiler.com/geocoding/${encodeURIComponent(searchQuery)}.json?key=${apiKey}&limit=5`
-        );
-        const data = await response.json();
-        setSearchResults(data.features || []);
+        // 1. Always try to search memories (Little Language OR Text Search)
+        try {
+            console.log("Searching memories with:", searchQuery);
+            const memoryRes = await api.get(`/memories/search?q=${encodeURIComponent(searchQuery)}`);
+            if (memoryRes.data && memoryRes.data.memories) {
+                setFilteredMemories(memoryRes.data.memories);
+                console.log("Found memories:", memoryRes.data.memories.length);
+            }
+        } catch (memError) {
+            console.error("Memory search failed", memError);
+        }
+
+        // 2. If it is NOT a specific Little Language query, ALSO search for locations
+        if (!isLittleLanguage) {
+            const apiKey = "v4vwdmxWVeQdVFt5xcEl";
+            const response = await fetch(
+                `https://api.maptiler.com/geocoding/${encodeURIComponent(searchQuery)}.json?key=${apiKey}&limit=5`
+            );
+            const data = await response.json();
+            setSearchResults(data.features || []);
+        } else {
+            setSearchResults([]);
+        }
+
     } catch (error: any) {
         console.error("Search error:", error);
     } finally {
@@ -359,17 +387,17 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
                 </button>
                 <input 
                     type="text" 
-                    placeholder={isSearching ? "Searching..." : "Search places..."}
+                    placeholder={isSearching ? "Searching..." : "Search places or memories (tag:nature)..."}
                     value={searchQuery}
                     onChange={(e: any) => setSearchQuery(e.target.value)}
                     disabled={isSearching}
-                    aria-label="Search places"
+                    aria-label="Search places or memories"
                 />
                 {searchQuery && !isSearching && (
                     <button 
                         type="button" 
                         className="clear-search" 
-                        onClick={() => {setSearchQuery(''); setSearchResults([])}}
+                        onClick={() => {setSearchQuery(''); setSearchResults([]); setFilteredMemories(null);}}
                         aria-label="Clear search"
                     >
                         <i className="ph ph-x"></i>

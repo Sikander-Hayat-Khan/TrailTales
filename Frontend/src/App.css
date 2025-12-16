@@ -1033,6 +1033,7 @@ nav {
   justify-content: center;
   transition: 0.3s;
   font-size: 1.2rem;
+  flex-shrink: 0;
 }
 
 .msg-icon-btn:hover { 
@@ -1214,6 +1215,7 @@ input:checked + .slider:before { transform: translateX(22px); }
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  padding-top: 10px;
 }
 
 .form-group input[type="text"],
@@ -1946,6 +1948,7 @@ input:checked + .slider:before { transform: translateX(22px); }
 .view-actions {
   display: flex;
   gap: 10px;
+  margin-right: 20px;
 }
 
 .view-actions .delete-btn {
