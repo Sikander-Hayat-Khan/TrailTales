@@ -7,6 +7,7 @@ import { MEMORY_CONFIG } from "../config/constants.js";
 export const searchMemories = async (req: Request, res: Response) => {
     try {
         const { q } = req.query;
+        console.log("Search Memories called with query:", q);
         if (!q) {
             return res.status(400).json({ msg: "Query parameter 'q' is required" });
         }
@@ -145,6 +146,7 @@ export const createMemory = async (req: Request, res: Response) => {
 export const getMemory = async (req: Request, res: Response) => {
   try {
     const { id: memoryID } = req.params;
+    console.log("Get Memory called with ID:", memoryID);
     const memory = await Memory.findOne({ _id: memoryID, userId: (req.user as any).userID });
     if (!memory) {
       return res.status(404).json({ msg: `No memory with id: ${memoryID}` });

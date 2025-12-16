@@ -17,13 +17,14 @@ userRouter.get("/logout",logout)
 userRouter.get("/auth",authorization,auth)
 
 // Memory Routes
+userRouter.route("/memories/search").get(authorization, searchMemories);
+
 userRouter.route("/memories")
     .get(authorization, getAllMemories)
     .post(authorization, upload.array('images', 5), createMemory);
 
 userRouter.route("/memories/public").get(getPublicMemories); // Public route, maybe optional auth?
 userRouter.route("/memories/friends").get(authorization, getFriendsMemories);
-userRouter.route("/memories/search").get(authorization, searchMemories);
 
 userRouter.route("/memories/:id")
     .get(authorization, getMemory)
