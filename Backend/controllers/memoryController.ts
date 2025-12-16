@@ -31,9 +31,9 @@ export const searchMemories = async (req: Request, res: Response) => {
                     }
                 }
             } else if (node.type === 'TEXT') {
-                // Search in title or description
+                // Search in title or story
                 orConditions.push({ title: { $regex: node.text, $options: 'i' } });
-                orConditions.push({ description: { $regex: node.text, $options: 'i' } });
+                orConditions.push({ story: { $regex: node.text, $options: 'i' } });
             }
         });
 
@@ -45,6 +45,7 @@ export const searchMemories = async (req: Request, res: Response) => {
         res.status(200).json({ memories });
 
     } catch (error) {
+        console.error("Search Error:", error);
         res.status(500).json({ msg: (error as any).message });
     }
 };
