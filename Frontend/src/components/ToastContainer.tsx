@@ -1,9 +1,9 @@
-import React from "react";
 
-const ToastContainer = ({ toasts }) => {
+
+const ToastContainer = ({ toasts }: any) => {
   return (
     <div id="toast-container">
-      {toasts.map((toast) => (
+      {toasts.map((toast: any) => (
         <div key={toast.id} className={`toast ${toast.type}`}>
           <i
             className={`ph ${
@@ -24,3 +24,4 @@ const ToastContainer = ({ toasts }) => {
 };
 
 export default ToastContainer;
+

@@ -1,6 +1,6 @@
-import React from "react";
 
-const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, memoryTitle }) => {
+
+const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, memoryTitle }: any) => {
   if (!isOpen) return null;
 
   return (
@@ -28,3 +28,4 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, memoryTitle }) =>
 };
 
 export default DeleteConfirmationModal;
+

@@ -1,6 +1,6 @@
-import React from "react";
 
-const MemoryViewModal = ({ isOpen, onClose, memory, onEdit, onDelete, currentUser }) => {
+
+const MemoryViewModal = ({ isOpen, onClose, memory, onEdit, onDelete, currentUser }: any) => {
   if (!isOpen || !memory) return null;
 
   const memoryOwnerId = typeof memory.userId === 'object' ? memory.userId._id : memory.userId;
@@ -53,7 +53,7 @@ const MemoryViewModal = ({ isOpen, onClose, memory, onEdit, onDelete, currentUse
 
           {memory.images && memory.images.length > 0 && (
             <div className="view-gallery">
-              {memory.images.map((img, index) => (
+              {memory.images.map((img: any, index: any) => (
                 <div key={index} className="view-image-container">
                   <img src={img} alt={`Memory ${index + 1}`} />
                 </div>
@@ -79,7 +79,7 @@ const MemoryViewModal = ({ isOpen, onClose, memory, onEdit, onDelete, currentUse
 
             {memory.tags && memory.tags.length > 0 && (
               <div className="view-tags">
-                {memory.tags.map((tag, i) => (
+                {memory.tags.map((tag: any, i: any) => (
                   <span key={i} className="tag-pill">#{tag}</span>
                 ))}
               </div>
@@ -92,3 +92,4 @@ const MemoryViewModal = ({ isOpen, onClose, memory, onEdit, onDelete, currentUse
 };
 
 export default MemoryViewModal;
+

@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import api from "../api/axios";
 
-const Chat = ({ user, selectedFriend }) => {
-  const [messages, setMessages] = useState([]);
+const Chat = ({ user, selectedFriend }: any) => {
+  const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const chatBoxRef = useRef(null);
+  const chatBoxRef = useRef<HTMLDivElement>(null);
   const shouldScrollRef = useRef(true);
 
   // Reset scroll behavior when friend changes
@@ -23,7 +23,7 @@ const Chat = ({ user, selectedFriend }) => {
         if (isMounted) {
             setMessages(res.data.messages);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Failed to fetch messages", error);
       }
     };
@@ -66,7 +66,7 @@ const Chat = ({ user, selectedFriend }) => {
       setMessages([...messages, res.data.message]);
       setNewMessage("");
       shouldScrollRef.current = true; // Force scroll to bottom when sending
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to send message", error);
     }
   };
@@ -92,7 +92,7 @@ const Chat = ({ user, selectedFriend }) => {
         onScroll={handleScroll}
         style={{ flex: 1, overflowY: 'auto', padding: '10px' }}
       >
-        {messages.map((msg, index) => {
+        {messages.map((msg: any, index: any) => {
           const senderId = msg.sender?._id || msg.sender;
           const currentUserId = user?._id || user?.id;
           const isMe = String(senderId) === String(currentUserId);
@@ -123,8 +123,8 @@ const Chat = ({ user, selectedFriend }) => {
           type="text" 
           placeholder="Type a message..." 
           value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+          onChange={(e: any) => setNewMessage(e.target.value)}
+          onKeyPress={(e: any) => e.key === 'Enter' && handleSendMessage()}
           style={{ flex: 1, padding: '8px', borderRadius: '20px', border: '1px solid #ccc' }}
         />
         <button 
@@ -140,3 +140,4 @@ const Chat = ({ user, selectedFriend }) => {
 };
 
 export default Chat;
+

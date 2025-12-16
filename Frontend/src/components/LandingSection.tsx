@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
-const LandingSection = ({ setDashboardOpen }) => {
+const LandingSection = ({ setDashboardOpen }: any) => {
   const [currentCard, setCurrentCard] = useState(0);
   const [typingText, setTypingText] = useState("");
 
@@ -30,13 +30,13 @@ const LandingSection = ({ setDashboardOpen }) => {
     return () => clearInterval(interval);
   }, []);
 
-  const nextCard = () => setCurrentCard((prev) => (prev + 1) % cards.length);
+  const nextCard = () => setCurrentCard((prev: any) => (prev + 1) % cards.length);
   const prevCard = () =>
-    setCurrentCard((prev) => (prev - 1 + cards.length) % cards.length);
+    setCurrentCard((prev: any) => (prev - 1 + cards.length) % cards.length);
 
   const renderTypingText = () => {
     if (!typingText) return null;
-    return typingText.split("").map((letter, idx) => (
+    return typingText.split("").map((letter: any, idx: any) => (
       <span
         key={idx}
         className="trail-letter"
@@ -86,7 +86,7 @@ const LandingSection = ({ setDashboardOpen }) => {
           <i className="ph ph-caret-left"></i>
         </button>
         <div className="card-stack">
-          {cards.map((card, index) => (
+          {cards.map((card: any, index: any) => (
             <div
               key={index}
               className={`card ${index === currentCard ? "active" : ""}`}
@@ -116,3 +116,4 @@ const LandingSection = ({ setDashboardOpen }) => {
 };
 
 export default LandingSection;
+

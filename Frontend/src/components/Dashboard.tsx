@@ -1,4 +1,4 @@
-import React, { useState, Suspense, lazy, useEffect } from "react";
+import { useState, Suspense, lazy, useEffect } from "react";
 import MapComponent from "./MapComponent";
 import Sidebar from "./Sidebar";
 import api from "../api/axios";
@@ -16,18 +16,18 @@ const Dashboard = ({
   setActiveView,
   handleToast,
   user
-}) => {
-  const [friends, setFriends] = useState([]);
+}: any) => {
+  const [friends, setFriends] = useState<any[]>([]);
   const [chatTitle, setChatTitle] = useState("Chat");
-  const [selectedFriend, setSelectedFriend] = useState(null);
+  const [selectedFriend, setSelectedFriend] = useState<any>(null);
   
   // Memory Modal State
   const [isMemoryModalOpen, setMemoryModalOpen] = useState(false);
   const [isViewModalOpen, setViewModalOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState(null);
-  const [selectedMemory, setSelectedMemory] = useState(null);
-  const [memories, setMemories] = useState([]);
-  const [friendsMemories, setFriendsMemories] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState<any>(null);
+  const [selectedMemory, setSelectedMemory] = useState<any>(null);
+  const [memories, setMemories] = useState<any[]>([]);
+  const [friendsMemories, setFriendsMemories] = useState<any[]>([]);
   const [showFriendsMemories, setShowFriendsMemories] = useState(false);
   
   // Notification Counts
@@ -36,7 +36,7 @@ const Dashboard = ({
   
   // Delete Confirmation State
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [memoryToDelete, setMemoryToDelete] = useState(null);
+  const [memoryToDelete, setMemoryToDelete] = useState<any>(null);
 
   // Fetch Memories on Mount or User Change
   useEffect(() => {
@@ -63,7 +63,7 @@ const Dashboard = ({
 
   // Poll for friends memories and notifications
   useEffect(() => {
-    let interval;
+    let interval: any;
     if (user) {
         const fetchData = async () => {
             try {
@@ -77,7 +77,7 @@ const Dashboard = ({
                     const res = await api.get("/memories/friends");
                     setFriendsMemories(res.data.memories);
                 }
-            } catch (error) {
+            } catch (error: any) {
                 console.error("Polling failed", error);
             }
         };
@@ -93,17 +93,17 @@ const Dashboard = ({
     };
   }, [user, showFriendsMemories]);
 
-  const switchView = (viewName) => {
+  const switchView = (viewName: any) => {
     setActiveView(viewName);
   };
 
-  const openChatWith = async (friend) => {
+  const openChatWith = async (friend: any) => {
     setChatTitle("Chat with " + friend.name);
     setSelectedFriend(friend);
     switchView("chat");
     
     // Optimistically update friends list to remove badge
-    setFriends(prevFriends => prevFriends.map(f => 
+    setFriends(prevFriends => prevFriends.map((f: any) => 
         (f.id === friend.id || f._id === friend.id) ? { ...f, unreadCount: 0 } : f
     ));
     
@@ -114,12 +114,12 @@ const Dashboard = ({
         // We don't know exactly how many unread from THIS friend, but we can trigger a refetch
         const notifRes = await api.get("/notifications/unread-counts");
         setUnreadMessagesCount(notifRes.data.unreadMessages);
-    } catch (error) {
+    } catch (error: any) {
         console.error("Failed to mark messages as read", error);
     }
   };
 
-  const handleOpenMemoryModal = async (lat, lng) => {
+  const handleOpenMemoryModal = async (lat: any, lng: any) => {
     if (!user) {
         handleToast("Info", "Please login to save memories.", "info");
         return;
@@ -140,29 +140,29 @@ const Dashboard = ({
       if (data && data.features && data.features.length > 0) {
         // Get the most relevant place name
         const placeName = data.features[0].place_name;
-        setSelectedLocation(prev => ({ ...prev, name: placeName }));
+        setSelectedLocation((prev: any) => ({ ...prev, name: placeName }));
       } else {
-        setSelectedLocation(prev => ({ ...prev, name: `${lat.toFixed(4)}, ${lng.toFixed(4)}` }));
+        setSelectedLocation((prev: any) => ({ ...prev, name: `${lat.toFixed(4)}, ${lng.toFixed(4)}` }));
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching location name:", error);
-      setSelectedLocation(prev => ({ ...prev, name: `${lat.toFixed(4)}, ${lng.toFixed(4)}` }));
+      setSelectedLocation((prev: any) => ({ ...prev, name: `${lat.toFixed(4)}, ${lng.toFixed(4)}` }));
     }
   };
 
-  const handleViewMemory = (memory) => {
+  const handleViewMemory = (memory: any) => {
     setSelectedMemory(memory);
     setViewModalOpen(true);
   };
 
-  const handleEditMemory = (memory) => {
+  const handleEditMemory = (memory: any) => {
     setViewModalOpen(false);
     setSelectedMemory(memory);
     setSelectedLocation(memory.location);
     setMemoryModalOpen(true);
   };
 
-  const handleSaveMemory = async (memoryData) => {
+  const handleSaveMemory = async (memoryData: any) => {
     try {
         const formData = new FormData();
         
@@ -178,12 +178,12 @@ const Dashboard = ({
         
         // Append tags
         if (memoryData.tags && memoryData.tags.length > 0) {
-            memoryData.tags.forEach(tag => formData.append("tags", tag));
+            memoryData.tags.forEach((tag: any) => formData.append("tags", tag));
         }
 
         // Append new image files
         if (memoryData.imageFiles && memoryData.imageFiles.length > 0) {
-            memoryData.imageFiles.forEach(file => {
+            memoryData.imageFiles.forEach((file: any) => {
                 formData.append("images", file);
             });
         }
@@ -192,7 +192,7 @@ const Dashboard = ({
         // Filter out blob URLs (which start with blob:) as they are local previews of new files
         // We only want to keep http/https URLs which are existing images
         if (memoryData.images && memoryData.images.length > 0) {
-            memoryData.images.forEach(img => {
+            memoryData.images.forEach((img: any) => {
                 if (!img.startsWith("blob:")) {
                     formData.append("existingImages", img);
                 }
@@ -205,7 +205,7 @@ const Dashboard = ({
             const res = await api.patch(`/memories/${id}`, formData, {
                 headers: { "Content-Type": "multipart/form-data" }
             });
-            setMemories(memories.map(m => (m._id === id || m.id === id) ? res.data.memory : m));
+            setMemories(memories.map((m: any) => (m._id === id || m.id === id) ? res.data.memory : m));
             handleToast("Success", "Memory updated successfully!", "success");
             
             // If we were editing, show the view modal again with updated data
@@ -227,14 +227,14 @@ const Dashboard = ({
             // However, ProfileModal uses 'user' object. We should ideally update the user object in App.js.
             // For now, let's just rely on the next page refresh or profile open to fetch fresh stats.
         }
-    } catch (error) {
+    } catch (error: any) {
         handleToast("Error", "Failed to save memory", "error");
         console.error(error);
     }
   };
 
-  const handleDeleteMemory = (id) => {
-    const memory = memories.find(m => m._id === id || m.id === id);
+  const handleDeleteMemory = (id: any) => {
+    const memory = memories.find((m: any) => m._id === id || m.id === id);
     setMemoryToDelete(memory);
     setDeleteModalOpen(true);
   };
@@ -244,12 +244,12 @@ const Dashboard = ({
       try {
           const id = memoryToDelete._id || memoryToDelete.id;
           await api.delete(`/memories/${id}`);
-          setMemories(memories.filter(m => m._id !== id && m.id !== id));
+          setMemories(memories.filter((m: any) => m._id !== id && m.id !== id));
           setDeleteModalOpen(false);
           setViewModalOpen(false);
           setMemoryToDelete(null);
           handleToast("Success", "Memory deleted successfully", "success");
-      } catch (error) {
+      } catch (error: any) {
           handleToast("Error", "Failed to delete memory", error.message);
       }
     }
@@ -310,7 +310,7 @@ const Dashboard = ({
       {/* Desktop Nav Rail */}
       {activeView !== "calendar" && (
         <div className="desktop-nav-rail">
-          {["map", "calendar", "friends", "chat", "profile"].map((view) => (
+          {["map", "calendar", "friends", "chat", "profile"].map((view: any) => (
             <button
               key={view}
               className={`desk-nav-item ${activeView === view ? "active" : ""}`}
@@ -347,7 +347,7 @@ const Dashboard = ({
           <CalendarView 
             memories={memories} 
             friendsMemories={friendsMemories}
-            onDateClick={(dateMemories) => {
+            onDateClick={(dateMemories: any) => {
               handleToast("Memories", `Found ${dateMemories.length} memories on this date`, "info");
             }}
             onSave={handleSaveMemory}
@@ -382,7 +382,7 @@ const Dashboard = ({
       />
 
       <nav className="mobile-nav">
-        {["map", "calendar", "friends", "chat", "profile"].map((view) => (
+        {["map", "calendar", "friends", "chat", "profile"].map((view: any) => (
           <button
             key={view}
             className={`nav-item ${activeView === view ? "active" : ""}`}
@@ -417,3 +417,4 @@ const Dashboard = ({
 };
 
 export default Dashboard;
+

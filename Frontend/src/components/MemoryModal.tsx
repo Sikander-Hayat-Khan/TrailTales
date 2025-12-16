@@ -1,6 +1,6 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 
-const MemoryModal = ({ isOpen, onClose, location, onSave, initialData }) => {
+const MemoryModal = ({ isOpen, onClose, location, onSave, initialData }: any) => {
   const [title, setTitle] = useState(initialData?.title || "");
   // Use local date string YYYY-MM-DD
   const [date, setDate] = useState(() => {
@@ -16,22 +16,22 @@ const MemoryModal = ({ isOpen, onClose, location, onSave, initialData }) => {
   const [visibility, setVisibility] = useState(initialData?.visibility || "private");
   const [tags, setTags] = useState(initialData?.tags ? initialData.tags.join(", ") : "");
   const [images, setImages] = useState(initialData?.images || []); // Preview URLs
-  const [imageFiles, setImageFiles] = useState([]); // Actual File objects
-  const [errors, setErrors] = useState({});
-  const fileInputRef = useRef(null);
+  const [imageFiles, setImageFiles] = useState<any[]>([]); // Actual File objects
+  const [errors, setErrors] = useState<any>({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = (e: any) => {
     const files = Array.from(e.target.files);
     // Create local URLs for preview
-    const newPreviews = files.map((file) => URL.createObjectURL(file));
+    const newPreviews = files.map((file: any) => URL.createObjectURL(file));
     setImages([...images, ...newPreviews]);
     setImageFiles([...imageFiles, ...files]);
   };
 
   const handleSubmit = () => {
-    const newErrors = {};
+    const newErrors: any = {};
     if (!title.trim()) newErrors.title = "Title is required";
     if (!date) newErrors.date = "Date is required";
 
@@ -48,7 +48,7 @@ const MemoryModal = ({ isOpen, onClose, location, onSave, initialData }) => {
       story,
       mood,
       visibility,
-      tags: tags.split(",").map(t => t.trim()).filter(t => t),
+      tags: tags.split(",").map((t: any) => t.trim()).filter((t: any) => t),
       images, // These are previews/existing URLs
       imageFiles // These are new files to upload
     });
@@ -79,7 +79,7 @@ const MemoryModal = ({ isOpen, onClose, location, onSave, initialData }) => {
             type="text" 
             placeholder="Give this memory a name..." 
             value={title}
-            onChange={(e) => {
+            onChange={(e: any) => {
               setTitle(e.target.value);
               if (errors.title) setErrors({...errors, title: null});
             }}
@@ -96,7 +96,7 @@ const MemoryModal = ({ isOpen, onClose, location, onSave, initialData }) => {
           <input 
             type="date" 
             value={date}
-            onChange={(e) => {
+            onChange={(e: any) => {
               setDate(e.target.value);
               if (errors.date) setErrors({...errors, date: null});
             }}
@@ -108,9 +108,9 @@ const MemoryModal = ({ isOpen, onClose, location, onSave, initialData }) => {
             <label>The Story</label>
             <textarea 
               placeholder="What happened here? Capture the moment..." 
-              rows="4"
+              rows={4}
               value={story}
-              onChange={(e) => setStory(e.target.value)}
+              onChange={(e: any) => setStory(e.target.value)}
             ></textarea>
           </div>
 
@@ -118,7 +118,7 @@ const MemoryModal = ({ isOpen, onClose, location, onSave, initialData }) => {
             <div className="form-group half">
               <label>Mood</label>
               <div className="mood-selector">
-                {["happy", "adventurous", "peaceful", "romantic"].map((m) => (
+                {["happy", "adventurous", "peaceful", "romantic"].map((m: any) => (
                   <button 
                     key={m} 
                     className={`mood-btn ${mood === m ? "active" : ""}`}
@@ -140,7 +140,7 @@ const MemoryModal = ({ isOpen, onClose, location, onSave, initialData }) => {
                 type="text" 
                 placeholder="nature, food, hike..." 
                 value={tags}
-                onChange={(e) => setTags(e.target.value)}
+                onChange={(e: any) => setTags(e.target.value)}
               />
             </div>
           </div>
@@ -149,7 +149,7 @@ const MemoryModal = ({ isOpen, onClose, location, onSave, initialData }) => {
             <label>Visibility</label>
             <select 
               value={visibility} 
-              onChange={(e) => setVisibility(e.target.value)}
+              onChange={(e: any) => setVisibility(e.target.value)}
               className="visibility-select"
               style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #384959', background: '#1e2330', color: '#fff' }}
             >
@@ -163,7 +163,7 @@ const MemoryModal = ({ isOpen, onClose, location, onSave, initialData }) => {
             <label>Photos</label>
             <div 
               className="image-upload-area"
-              onClick={() => fileInputRef.current.click()}
+              onClick={() => fileInputRef.current?.click()}
             >
               {images.length === 0 ? (
                 <div className="upload-placeholder">
@@ -172,7 +172,7 @@ const MemoryModal = ({ isOpen, onClose, location, onSave, initialData }) => {
                 </div>
               ) : (
                 <div className="image-preview-row">
-                  {images.map((img, idx) => (
+                  {images.map((img: any, idx: any) => (
                     <div key={idx} className="img-preview" style={{backgroundImage: `url(${img})`}}></div>
                   ))}
                   <div className="add-more-btn">
@@ -200,3 +200,4 @@ const MemoryModal = ({ isOpen, onClose, location, onSave, initialData }) => {
 };
 
 export default MemoryModal;
+

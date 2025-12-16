@@ -1,20 +1,20 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
-const CalendarView = ({ memories, friendsMemories = [], onDateClick, onSave }) => {
-  const containerRef = useRef(null);
-  const [selectedDateMemories, setSelectedDateMemories] = useState(null);
-  const [viewingMemory, setViewingMemory] = useState(null);
+const CalendarView = ({ memories, friendsMemories = [], onDateClick, onSave }: any) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [selectedDateMemories, setSelectedDateMemories] = useState<any>(null);
+  const [viewingMemory, setViewingMemory] = useState<any>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isEditingStory, setIsEditingStory] = useState(false);
   const [editedStory, setEditedStory] = useState("");
 
   // Combine memories with a flag
   const allMemories = [
-    ...memories.map(m => ({ ...m, isFriend: false })),
-    ...friendsMemories.map(m => ({ ...m, isFriend: true }))
+    ...memories.map((m: any) => ({ ...m, isFriend: false })),
+    ...friendsMemories.map((m: any) => ({ ...m, isFriend: true }))
   ];
 
-  const handleMemoryClick = (memory) => {
+  const handleMemoryClick = (memory: any) => {
     setViewingMemory(memory);
     setCurrentImageIndex(0);
     setEditedStory(memory.story || "");
@@ -23,13 +23,13 @@ const CalendarView = ({ memories, friendsMemories = [], onDateClick, onSave }) =
 
   const handleNextImage = () => {
     if (viewingMemory?.images?.length) {
-      setCurrentImageIndex((prev) => (prev + 1) % viewingMemory.images.length);
+      setCurrentImageIndex((prev: any) => (prev + 1) % viewingMemory.images.length);
     }
   };
 
   const handlePrevImage = () => {
     if (viewingMemory?.images?.length) {
-      setCurrentImageIndex((prev) => (prev - 1 + viewingMemory.images.length) % viewingMemory.images.length);
+      setCurrentImageIndex((prev: any) => (prev - 1 + viewingMemory.images.length) % viewingMemory.images.length);
     }
   };
 
@@ -40,7 +40,7 @@ const CalendarView = ({ memories, friendsMemories = [], onDateClick, onSave }) =
     setViewingMemory(updatedMemory);
     setIsEditingStory(false);
     
-    const updatedList = selectedDateMemories.map(m => 
+    const updatedList = selectedDateMemories.map((m: any) => 
       (m.id === viewingMemory.id || m._id === viewingMemory._id) ? updatedMemory : m
     );
     setSelectedDateMemories(updatedList);
@@ -72,7 +72,7 @@ const CalendarView = ({ memories, friendsMemories = [], onDateClick, onSave }) =
     }, 100);
   }, []);
 
-  const getDaysInMonth = (date) => {
+  const getDaysInMonth = (date: any) => {
     const year = date.getFullYear();
     const month = date.getMonth();
     const days = new Date(year, month + 1, 0).getDate();
@@ -80,8 +80,8 @@ const CalendarView = ({ memories, friendsMemories = [], onDateClick, onSave }) =
     return { days, firstDay };
   };
 
-  const getMemoriesForDate = (dateStr) => {
-    return allMemories.filter(m => {
+  const getMemoriesForDate = (dateStr: any) => {
+    return allMemories.filter((m: any) => {
         if (!m.date) return false;
         // If it's an exact match (YYYY-MM-DD)
         if (m.date === dateStr) return true;
@@ -106,7 +106,7 @@ const CalendarView = ({ memories, friendsMemories = [], onDateClick, onSave }) =
       </div>
       
       <div className="months-scroll-container">
-        {months.map((monthDate, index) => {
+        {months.map((monthDate: any, index: any) => {
           const { days, firstDay } = getDaysInMonth(monthDate);
           const monthName = monthDate.toLocaleString('default', { month: 'long' });
           const year = monthDate.getFullYear();
@@ -122,25 +122,25 @@ const CalendarView = ({ memories, friendsMemories = [], onDateClick, onSave }) =
                 ))}
                 
                 {/* Empty slots for start of month */}
-                {Array(firstDay).fill(null).map((_, i) => (
+                {Array(firstDay).fill(null).map((_: any, i: any) => (
                   <div key={`empty-${i}`} className="day-cell empty"></div>
                 ))}
 
                 {/* Days */}
-                {Array(days).fill(null).map((_, i) => {
+                {Array(days).fill(null).map((_: any, i: any) => {
                   const dayNum = i + 1;
                   // Format date as YYYY-MM-DD to match input type="date"
                   const dateStr = `${year}-${String(monthDate.getMonth() + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
                   const dayMemories = getMemoriesForDate(dateStr);
-                  // const hasImages = dayMemories.some(m => m.images && m.images.length > 0);
+                  // const hasImages = dayMemories.some((m: any) => m.images && m.images.length > 0);
                   
                   // Prioritize own images for cover, then friends
-                  const ownMemoryWithImage = dayMemories.find(m => !m.isFriend && m.images && m.images.length > 0);
-                  const friendMemoryWithImage = dayMemories.find(m => m.isFriend && m.images && m.images.length > 0);
+                  const ownMemoryWithImage = dayMemories.find((m: any) => !m.isFriend && m.images && m.images.length > 0);
+                  const friendMemoryWithImage = dayMemories.find((m: any) => m.isFriend && m.images && m.images.length > 0);
                   const coverImage = ownMemoryWithImage ? ownMemoryWithImage.images[0] : (friendMemoryWithImage ? friendMemoryWithImage.images[0] : null);
                   
-                  const hasFriendMemory = dayMemories.some(m => m.isFriend);
-                  const hasOwnMemory = dayMemories.some(m => !m.isFriend);
+                  const hasFriendMemory = dayMemories.some((m: any) => m.isFriend);
+                  const hasOwnMemory = dayMemories.some((m: any) => !m.isFriend);
 
                   return (
                     <div 
@@ -182,7 +182,7 @@ const CalendarView = ({ memories, friendsMemories = [], onDateClick, onSave }) =
             </button>
           </div>
           <div className="entries-list">
-            {selectedDateMemories.map((memory) => (
+            {selectedDateMemories.map((memory: any) => (
               <div key={memory.id || memory._id} className={`entry-item ${memory.isFriend ? 'friend-entry' : ''}`} onClick={() => handleMemoryClick(memory)}>
                 <div className="entry-info">
                   <h4 className="entry-date">
@@ -226,7 +226,7 @@ const CalendarView = ({ memories, friendsMemories = [], onDateClick, onSave }) =
                           <i className="ph ph-caret-right"></i>
                         </button>
                         <div className="carousel-dots">
-                          {viewingMemory.images.map((_, idx) => (
+                          {viewingMemory.images.map((_: any, idx: any) => (
                             <span key={idx} className={`dot ${idx === currentImageIndex ? 'active' : ''}`}></span>
                           ))}
                         </div>
@@ -251,7 +251,7 @@ const CalendarView = ({ memories, friendsMemories = [], onDateClick, onSave }) =
                   {isEditingStory ? (
                     <textarea 
                       value={editedStory} 
-                      onChange={(e) => setEditedStory(e.target.value)}
+                      onChange={(e: any) => setEditedStory(e.target.value)}
                       className="story-editor"
                       autoFocus
                     />
@@ -286,3 +286,4 @@ const CalendarView = ({ memories, friendsMemories = [], onDateClick, onSave }) =
 };
 
 export default CalendarView;
+

@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import api from "../api/axios";
 
-const AuthModal = ({ isOpen, onClose, authMode, setAuthMode, logo, handleToast, setIsLoggedIn, setUser }) => {
+const AuthModal = ({ isOpen, onClose, authMode, setAuthMode, logo, handleToast, setIsLoggedIn, setUser }: any) => {
   // Backend User model has 'username' and 'email'. 
   // Frontend input placeholder says "Email".
   // I should probably send 'email' as 'email' and 'username' as 'username'.
@@ -28,17 +28,17 @@ const AuthModal = ({ isOpen, onClose, authMode, setAuthMode, logo, handleToast, 
     onClose();
   };
 
-  const handleModeSwitch = (e) => {
+  const handleModeSwitch = (e: any) => {
     e.preventDefault();
     resetForm();
     setAuthMode(authMode === "login" ? "signup" : "login");
   };
 
-  const isValidEmail = (email) => {
+  const isValidEmail = (email: any) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleAuthSubmit = async (e) => {
+  const handleAuthSubmit = async (e: any) => {
     e.preventDefault();
 
     if (authMode === "forgot-password") {
@@ -121,7 +121,7 @@ const AuthModal = ({ isOpen, onClose, authMode, setAuthMode, logo, handleToast, 
         
         handleClose();
       }
-    } catch (error) {
+    } catch (error: any) {
       const msg = error.response?.data?.msg || "Something went wrong";
       handleToast("Error", msg, "error");
     }
@@ -131,7 +131,7 @@ const AuthModal = ({ isOpen, onClose, authMode, setAuthMode, logo, handleToast, 
     <div
       id="auth-modal-overlay"
       className={`modal-overlay ${isOpen ? "active" : ""}`}
-      onClick={(e) => e.target.id === "auth-modal-overlay" && handleClose()}
+      onClick={(e: any) => e.target.id === "auth-modal-overlay" && handleClose()}
     >
       <div className="auth-modal-window">
         <button className="close-modal-btn" onClick={handleClose}>
@@ -157,7 +157,7 @@ const AuthModal = ({ isOpen, onClose, authMode, setAuthMode, logo, handleToast, 
                 type="text"
                 placeholder="Full Name"
                 value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                onChange={(e: any) => setFullName(e.target.value)}
                 required
               />
             </div>
@@ -168,7 +168,7 @@ const AuthModal = ({ isOpen, onClose, authMode, setAuthMode, logo, handleToast, 
               type="email"
               placeholder="Email Address"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e: any) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -179,7 +179,7 @@ const AuthModal = ({ isOpen, onClose, authMode, setAuthMode, logo, handleToast, 
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e: any) => setPassword(e.target.value)}
                 required
                 style={{ paddingRight: "45px" }}
               />
@@ -195,7 +195,7 @@ const AuthModal = ({ isOpen, onClose, authMode, setAuthMode, logo, handleToast, 
               <label className="remember-me">
                 <input type="checkbox" /> <span>Remember me</span>
               </label>
-              <a href="#" className="forgot-pass" onClick={(e) => {
+              <a href="#" className="forgot-pass" onClick={(e: any) => {
                 e.preventDefault();
                 setAuthMode("forgot-password");
               }}>
@@ -230,3 +230,4 @@ const AuthModal = ({ isOpen, onClose, authMode, setAuthMode, logo, handleToast, 
 };
 
 export default AuthModal;
+

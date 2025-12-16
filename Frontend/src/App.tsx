@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, lazy } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import "@phosphor-icons/web/regular";
 import "./App.css";
 import api from "./api/axios";
@@ -27,10 +27,10 @@ function App() {
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
   const [isProfileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
 
   // Toasts
-  const [toasts, setToasts] = useState([]);
+  const [toasts, setToasts] = useState<any[]>([]);
 
   // --- EFFECTS ---
   useEffect(() => {
@@ -43,7 +43,7 @@ function App() {
 
     // Close profile dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event: any) => {
       if (isProfileDropdownOpen && !event.target.closest('.profile-menu-container')) {
         setProfileDropdownOpen(false);
       }
@@ -80,11 +80,11 @@ function App() {
   }, []);
 
   // --- HANDLERS ---
-  const handleToast = (title, message, type = "success") => {
+  const handleToast = (title: any, message: any, type = "success") => {
     const id = crypto.randomUUID();
-    setToasts((prev) => [...prev, { id, title, message, type }]);
+    setToasts((prev: any) => [...prev, { id, title, message, type }]);
     setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
+      setToasts((prev: any) => prev.filter((t: any) => t.id !== id));
     }, 3500);
   };
 
@@ -95,7 +95,7 @@ function App() {
       setUser(null);
       setProfileDropdownOpen(false);
       handleToast("Success", "Logged out successfully", "success");
-    } catch (error) {
+    } catch (error: any) {
       handleToast("Error", "Logout failed", error.message);
     }
   };
@@ -154,3 +154,4 @@ function App() {
 }
 
 export default App;
+

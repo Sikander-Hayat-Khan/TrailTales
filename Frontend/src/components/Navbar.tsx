@@ -1,4 +1,4 @@
-import React from "react";
+
 
 const Navbar = ({
   logo,
@@ -10,7 +10,7 @@ const Navbar = ({
   isLoggedIn,
   handleLogout,
   user,
-}) => {
+}: any) => {
   return (
     <nav>
       <div className="logo">
@@ -83,7 +83,7 @@ const Navbar = ({
             </button>
             <button 
               className="dropdown-item"
-              onClick={(e) => {
+              onClick={(e: any) => {
                 e.preventDefault();
                 alert("Settings feature coming soon!");
               }}
@@ -95,7 +95,7 @@ const Navbar = ({
             {isLoggedIn && (
               <button 
                 className="dropdown-item logout-link" 
-                onClick={(e) => {
+                onClick={(e: any) => {
                   e.preventDefault();
                   handleLogout();
                 }}
@@ -112,3 +112,4 @@ const Navbar = ({
 };
 
 export default Navbar;
+

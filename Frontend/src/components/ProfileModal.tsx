@@ -1,7 +1,7 @@
-import React, { useState} from "react";
+import { useState} from "react";
 import api from "../api/axios";
 
-const ProfileModal = ({ isOpen, onClose, user, setUser, handleToast }) => {
+const ProfileModal = ({ isOpen, onClose, user, setUser, handleToast }: any) => {
   const [isEditing, setIsEditing] = useState(false);
   const [bio, setBio] = useState(user?.bio || "Just a traveler exploring the world one pin at a time.");
   const [avatarColor, setAvatarColor] = useState(user?.avatarColor || "#f28b50");
@@ -12,7 +12,7 @@ const ProfileModal = ({ isOpen, onClose, user, setUser, handleToast }) => {
         setUser(res.data.user);
         setIsEditing(false);
         handleToast("Success", "Profile updated successfully", "success");
-    } catch (error) {
+    } catch (error: any) {
         handleToast("Error", "Failed to update profile", error.message);
     }
   };
@@ -21,7 +21,7 @@ const ProfileModal = ({ isOpen, onClose, user, setUser, handleToast }) => {
     <div
       id="profile-modal-overlay"
       className={`modal-overlay ${isOpen ? "active" : ""}`}
-      onClick={(e) => e.target.id === "profile-modal-overlay" && onClose()}
+      onClick={(e: any) => e.target.id === "profile-modal-overlay" && onClose()}
     >
       <div className="profile-modal-window">
         <button className="close-modal-btn" onClick={onClose}>
@@ -37,7 +37,7 @@ const ProfileModal = ({ isOpen, onClose, user, setUser, handleToast }) => {
                  <input 
                     type="color" 
                     value={avatarColor} 
-                    onChange={(e) => setAvatarColor(e.target.value)} 
+                    onChange={(e: any) => setAvatarColor(e.target.value)} 
                  />
              </div>
           )}
@@ -58,8 +58,8 @@ const ProfileModal = ({ isOpen, onClose, user, setUser, handleToast }) => {
           {isEditing ? (
             <textarea 
               value={bio} 
-              onChange={(e) => setBio(e.target.value)}
-              rows="4"
+              onChange={(e: any) => setBio(e.target.value)}
+              rows={4}
               style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ddd", color: "#000" }}
             />
           ) : (
@@ -80,3 +80,4 @@ const ProfileModal = ({ isOpen, onClose, user, setUser, handleToast }) => {
 };
 
 export default ProfileModal;
+

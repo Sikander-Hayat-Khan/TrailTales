@@ -1,35 +1,35 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import api from "../api/axios";
 
-const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, onMemoryClick, memories, user, showFriendsMemories, setShowFriendsMemories }) => {
-  const mapContainerRef = useRef(null);
-  const mapInstanceRef = useRef(null);
+const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, onMemoryClick, memories, user, showFriendsMemories, setShowFriendsMemories }: any) => {
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
   const activeViewRef = useRef(activeView);
   const onOpenMemoryRef = useRef(onOpenMemory);
   const onMemoryClickRef = useRef(onMemoryClick);
-  const markersRef = useRef([]);
-  const friendLocationMarkersRef = useRef([]); // New ref for friend location markers
+  const markersRef = useRef<L.Marker[]>([]);
+  const friendLocationMarkersRef = useRef<L.Marker[]>([]); // New ref for friend location markers
   const userRef = useRef(user);
 
   // Search State
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
-  const [friendsLocations, setFriendsLocations] = useState([]); // State for friends' live locations
+  const [friendsLocations, setFriendsLocations] = useState<any[]>([]); // State for friends' live locations
 
   // Poll for friends' locations if toggle is on
   useEffect(() => {
-      let interval;
+      let interval: any;
       if (showFriendsMemories && user) {
           const fetchLocations = async () => {
               try {
                   const res = await api.get("/friends");
                   // Filter friends who are sharing location and have a valid location
                   const locations = res.data.friends
-                      .filter(f => f.isLocationShared && f.lastLocation && f.lastLocation.lat)
-                      .map(f => ({
+                      .filter((f: any) => f.isLocationShared && f.lastLocation && f.lastLocation.lat)
+                      .map((f: any) => ({
                           id: f._id,
                           username: f.username,
                           avatarColor: f.avatarColor,
@@ -38,7 +38,7 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
                           timestamp: f.lastLocation.timestamp
                       }));
                   setFriendsLocations(locations);
-              } catch (error) {
+              } catch (error: any) {
                   console.error("Failed to fetch friend locations", error);
               }
           };
@@ -59,7 +59,7 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
       friendLocationMarkersRef.current.forEach(marker => marker.remove());
       friendLocationMarkersRef.current = [];
 
-      friendsLocations.forEach(friend => {
+      friendsLocations.forEach((friend: any) => {
           const icon = L.divIcon({
               className: "friend-location-pin",
               html: `
@@ -84,7 +84,7 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
           });
 
           const marker = L.marker([friend.lat, friend.lng], { icon })
-              .addTo(mapInstanceRef.current)
+               .addTo(mapInstanceRef.current as L.Map)
               .bindPopup(`<b>${friend.username}</b><br>Last seen: ${new Date(friend.timestamp).toLocaleTimeString()}`);
           
           friendLocationMarkersRef.current.push(marker);
@@ -177,7 +177,7 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
     });
 
     // Store icon in map instance for reuse
-    map.pinIcon = pinIcon;
+    (map as any).pinIcon = pinIcon;
 
     // Handle Map Clicks (New Pin)
     map.on("click", function (e) {
@@ -210,7 +210,7 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
     markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
 
-    const pinIcon = mapInstanceRef.current.pinIcon;
+    const pinIcon = (mapInstanceRef.current as any).pinIcon;
 
     // Define Friend Pin Icon
     const friendPinIcon = L.divIcon({
@@ -224,7 +224,7 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
       popupAnchor: [0, -10],
     });
 
-    memories.forEach((memory) => {
+    memories.forEach((memory: any) => {
       // Handle both old format (coords array) and new format (location object)
       let lat, lng;
       if (memory.location && typeof memory.location === 'object') {
@@ -252,10 +252,10 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
       const iconToUse = isFriendMemory ? friendPinIcon : pinIcon;
 
       const marker = L.marker([lat, lng], { icon: iconToUse })
-        .addTo(mapInstanceRef.current);
+        .addTo(mapInstanceRef.current as L.Map);
       
       // Add click handler to open view modal
-      marker.on('click', (e) => {
+      marker.on('click', (e: any) => {
         L.DomEvent.stopPropagation(e); // Prevent map click
         if (onMemoryClickRef.current) {
           onMemoryClickRef.current(memory);
@@ -277,7 +277,7 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
 
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
+      async (position: any) => {
         const { latitude, longitude } = position.coords;
         
         // If user has location sharing on, update backend
@@ -298,7 +298,7 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
         }
         setIsLocating(false);
       },
-      (error) => {
+      (error: any) => {
         console.error("Error getting location:", error);
         alert("Unable to retrieve your location");
         setIsLocating(false);
@@ -307,7 +307,7 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
   };
 
   // Search Logic
-  const handleSearch = async (e) => {
+  const handleSearch = async (e: any) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
     
@@ -319,14 +319,14 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
         );
         const data = await response.json();
         setSearchResults(data.features || []);
-    } catch (error) {
+    } catch (error: any) {
         console.error("Search error:", error);
     } finally {
         setIsSearching(false);
     }
   };
 
-  const handleSelectResult = (result) => {
+  const handleSelectResult = (result: any) => {
       const [lng, lat] = result.center;
       if (mapInstanceRef.current) {
           mapInstanceRef.current.flyTo([lat, lng], 14, {
@@ -341,10 +341,10 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <div 
             className={`map-search-container ${activeView !== 'map' ? 'hidden' : ''}`}
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-            onDoubleClick={(e) => e.stopPropagation()}
-            onTouchStart={(e) => e.stopPropagation()}
+            onMouseDown={(e: any) => e.stopPropagation()}
+            onClick={(e: any) => e.stopPropagation()}
+            onDoubleClick={(e: any) => e.stopPropagation()}
+            onTouchStart={(e: any) => e.stopPropagation()}
         >
             <form onSubmit={handleSearch} role="search">
                 <button 
@@ -361,7 +361,7 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
                     type="text" 
                     placeholder={isSearching ? "Searching..." : "Search places..."}
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e: any) => setSearchQuery(e.target.value)}
                     disabled={isSearching}
                     aria-label="Search places"
                 />
@@ -390,14 +390,14 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
             </form>
             {searchResults.length > 0 && (
                 <div className="search-results" role="listbox">
-                    {searchResults.map(result => (
+                    {searchResults.map((result: any) => (
                         <div 
                             key={result.id} 
                             className="search-result-item" 
                             onClick={() => handleSelectResult(result)}
                             role="option"
-                            tabIndex="0"
-                            onKeyPress={(e) => e.key === 'Enter' && handleSelectResult(result)}
+                            tabIndex={0}
+                            onKeyPress={(e: any) => e.key === 'Enter' && handleSelectResult(result)}
                         >
                             <i className="ph ph-map-pin"></i>
                             <span>{result.place_name}</span>
@@ -412,3 +412,4 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
 };
 
 export default MapComponent;
+
