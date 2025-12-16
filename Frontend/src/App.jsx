@@ -32,7 +32,7 @@ function App() {
   // Toasts
   const [toasts, setToasts] = useState([]);
 
-  // --- EFFECTS ---
+  // -- EFFECTS --
   useEffect(() => {
     if (isDashboardOpen) {
       document.body.classList.add("dashboard-open");
@@ -50,11 +50,11 @@ function App() {
           setIsLoggedIn(true);
           // Fetch full profile to get stats
           try {
-              const profileRes = await api.get("/profile");
-              setUser(profileRes.data.user);
+            const profileRes = await api.get("/profile");
+            setUser(profileRes.data.user);
           } catch (e) {
-              // Fallback to basic user info if profile fetch fails
-              setUser(res.data.user);
+            // Fallback to basic user info if profile fetch fails
+            setUser(res.data.user);
           }
         }
       } catch (error) {
@@ -123,7 +123,9 @@ function App() {
         <LandingSection setDashboardOpen={setDashboardOpen} />
       </section>
 
-      <Suspense fallback={<div className="loading-screen">Loading Dashboard...</div>}>
+      <Suspense
+        fallback={<div className="loading-screen">Loading Dashboard...</div>}
+      >
         <Dashboard
           isDashboardOpen={isDashboardOpen}
           setDashboardOpen={setDashboardOpen}
