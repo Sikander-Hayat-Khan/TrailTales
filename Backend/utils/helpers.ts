@@ -9,7 +9,7 @@
  * @param {Object} obj - The object to sanitize.
  * @returns {Object} - The sanitized object.
  */
-export const sanitizeObject = (obj) => {
+export const sanitizeObject = (obj: any): any => {
     if (typeof obj !== 'object' || obj === null) {
         return obj;
     }
@@ -18,7 +18,7 @@ export const sanitizeObject = (obj) => {
         return obj.map(item => sanitizeObject(item));
     }
 
-    const newObj = {};
+    const newObj: any = {};
     for (const key in obj) {
         if (key === 'password' || (key.startsWith('_') && key !== '_id')) {
             continue;
@@ -33,7 +33,7 @@ export const sanitizeObject = (obj) => {
  * @param {boolean} condition - The condition to check.
  * @param {string} message - The error message if assertion fails.
  */
-export const assert = (condition, message) => {
+export const assert = (condition: boolean, message: string) => {
     if (!condition) {
         throw new Error(`Assertion Failed: ${message}`);
     }

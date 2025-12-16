@@ -15,7 +15,7 @@ const storage = new CloudinaryStorage({
   params: {
     folder: 'trailtales',
     allowed_formats: ['jpg', 'png', 'jpeg'],
-  },
+  } as any,
 });
 
 export { cloudinary, storage };

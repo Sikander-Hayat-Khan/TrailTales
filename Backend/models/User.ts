@@ -42,6 +42,9 @@ UserSchema.pre("save",async function(){
     this.password = await bcryptjs.hash(this.password,salt)
 })
 UserSchema.methods.createJWT = function(){
+    if (!process.env.JWT_SECRET) {
+        throw new Error("JWT_SECRET is not defined");
+    }
     return jwt.sign({userID:this._id,username: this.username},process.env.JWT_SECRET,{expiresIn:"30d"})
 }
 

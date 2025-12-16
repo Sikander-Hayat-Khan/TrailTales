@@ -1,9 +1,10 @@
+import { Request, Response } from "express";
 import Memory from "../models/Memory.js";
 import User from "../models/User.js";
 import { parseSearchQuery } from "../utils/searchParser.js";
 import { MEMORY_CONFIG } from "../config/constants.js";
 
-export const searchMemories = async (req, res) => {
+export const searchMemories = async (req: Request, res: Response) => {
     try {
         const { q } = req.query;
         if (!q) {
@@ -11,12 +12,12 @@ export const searchMemories = async (req, res) => {
         }
 
         // Use the Little Language Parser
-        const ast = parseSearchQuery(q);
+        const ast = parseSearchQuery(q as string);
         
-        const query = { userId: req.user.userID }; // Default to searching own memories
-        const orConditions = [];
+        const query: any = { userId: (req.user as any).userID }; // Default to searching own memories
+        const orConditions: any[] = [];
 
-        ast.forEach(node => {
+        ast.forEach((node: any) => {
             if (node.type === 'FILTER') {
                 if (node.field === 'tag') {
                     query.tags = node.value;
@@ -44,33 +45,36 @@ export const searchMemories = async (req, res) => {
         res.status(200).json({ memories });
 
     } catch (error) {
-        res.status(500).json({ msg: error.message });
+        res.status(500).json({ msg: (error as any).message });
     }
 };
 
-export const getAllMemories = async (req, res) => {
+export const getAllMemories = async (req: Request, res: Response) => {
   try {
-    const memories = await Memory.find({ userId: req.user.userID }).sort("-createdAt");
+    const memories = await Memory.find({ userId: (req.user as any).userID }).sort("-createdAt");
     res.status(200).json({ memories });
   } catch (error) {
-    res.status(500).json({ msg: error.message });
+    res.status(500).json({ msg: (error as any).message });
   }
 };
 
-export const getPublicMemories = async (req, res) => {
+export const getPublicMemories = async (req: Request, res: Response) => {
   try {
     const memories = await Memory.find({ visibility: "public" })
       .populate("userId", "username avatarColor")
       .sort("-createdAt");
     res.status(200).json({ memories });
   } catch (error) {
-    res.status(500).json({ msg: error.message });
+    res.status(500).json({ msg: (error as any).message });
   }
 };
 
-export const getFriendsMemories = async (req, res) => {
+export const getFriendsMemories = async (req: Request, res: Response) => {
   try {
-    const user = await User.findById(req.user.userID);
+    const user = await User.findById((req.user as any).userID);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
     const friendsIds = user.friends;
 
     const memories = await Memory.find({
@@ -82,18 +86,18 @@ export const getFriendsMemories = async (req, res) => {
 
     res.status(200).json({ memories });
   } catch (error) {
-    res.status(500).json({ msg: error.message });
+    res.status(500).json({ msg: (error as any).message });
   }
 };
 
-export const createMemory = async (req, res) => {
+export const createMemory = async (req: Request, res: Response) => {
   try {
     console.log("Create Memory Body:", req.body);
-    req.body.userId = req.user.userID;
+    req.body.userId = (req.user as any).userID;
     
     // Handle file uploads
-    if (req.files && req.files.length > 0) {
-        const imageUrls = req.files.map(file => file.path);
+    if (req.files && (req.files as Express.Multer.File[]).length > 0) {
+        const imageUrls = (req.files as Express.Multer.File[]).map(file => file.path);
         req.body.images = imageUrls;
     }
 
@@ -133,30 +137,30 @@ export const createMemory = async (req, res) => {
     res.status(201).json({ memory });
   } catch (error) {
     console.error("Create Memory Error:", error);
-    res.status(500).json({ msg: error.message });
+    res.status(500).json({ msg: (error as any).message });
   }
 };
 
-export const getMemory = async (req, res) => {
+export const getMemory = async (req: Request, res: Response) => {
   try {
     const { id: memoryID } = req.params;
-    const memory = await Memory.findOne({ _id: memoryID, userId: req.user.userID });
+    const memory = await Memory.findOne({ _id: memoryID, userId: (req.user as any).userID });
     if (!memory) {
       return res.status(404).json({ msg: `No memory with id: ${memoryID}` });
     }
     res.status(200).json({ memory });
   } catch (error) {
-    res.status(500).json({ msg: error.message });
+    res.status(500).json({ msg: (error as any).message });
   }
 };
 
-export const updateMemory = async (req, res) => {
+export const updateMemory = async (req: Request, res: Response) => {
   try {
     const { id: memoryID } = req.params;
     
     // Handle file uploads
-    if (req.files && req.files.length > 0) {
-        const newImageUrls = req.files.map(file => file.path);
+    if (req.files && (req.files as Express.Multer.File[]).length > 0) {
+        const newImageUrls = (req.files as Express.Multer.File[]).map(file => file.path);
         // If there are existing images passed as strings (from frontend state), keep them
         let existingImages = [];
         if (req.body.existingImages) {
@@ -195,7 +199,7 @@ export const updateMemory = async (req, res) => {
     }
 
     const memory = await Memory.findOneAndUpdate(
-      { _id: memoryID, userId: req.user.userID },
+      { _id: memoryID, userId: (req.user as any).userID },
       req.body,
       { new: true, runValidators: true }
     );
@@ -205,19 +209,19 @@ export const updateMemory = async (req, res) => {
     res.status(200).json({ memory });
   } catch (error) {
     console.error("Update Memory Error:", error);
-    res.status(500).json({ msg: error.message });
+    res.status(500).json({ msg: (error as any).message });
   }
 };
 
-export const deleteMemory = async (req, res) => {
+export const deleteMemory = async (req: Request, res: Response) => {
   try {
     const { id: memoryID } = req.params;
-    const memory = await Memory.findOneAndDelete({ _id: memoryID, userId: req.user.userID });
+    const memory = await Memory.findOneAndDelete({ _id: memoryID, userId: (req.user as any).userID });
     if (!memory) {
       return res.status(404).json({ msg: `No memory with id: ${memoryID}` });
     }
     res.status(200).json({ msg: "Memory deleted successfully" });
   } catch (error) {
-    res.status(500).json({ msg: error.message });
+    res.status(500).json({ msg: (error as any).message });
   }
 };

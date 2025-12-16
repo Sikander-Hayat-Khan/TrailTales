@@ -1,9 +1,10 @@
+import { Request, Response } from "express";
 import Message from "../models/Message.js";
 import FriendRequest from "../models/FriendRequest.js";
 
-export const getUnreadCounts = async (req, res) => {
+export const getUnreadCounts = async (req: Request, res: Response) => {
     try {
-        const userId = req.user.userID;
+        const userId = (req.user as any).userID;
 
         // Count unread messages where the current user is the receiver
         const unreadMessagesCount = await Message.countDocuments({

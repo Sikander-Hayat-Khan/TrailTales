@@ -1,10 +1,11 @@
+import { Request, Response } from "express";
 import Message from "../models/Message.js";
 import User from "../models/User.js";
 
-export const sendMessage = async (req, res) => {
+export const sendMessage = async (req: Request, res: Response) => {
     try {
         const { receiverId, content } = req.body;
-        const senderId = req.user.userID;
+        const senderId = (req.user as any).userID;
 
         if (!receiverId || !content) {
             return res.status(400).json({ msg: "Receiver and content are required" });
@@ -33,10 +34,10 @@ export const sendMessage = async (req, res) => {
     }
 };
 
-export const getMessages = async (req, res) => {
+export const getMessages = async (req: Request, res: Response) => {
     try {
         const { friendId } = req.params;
-        const userId = req.user.userID;
+        const userId = (req.user as any).userID;
 
         const messages = await Message.find({
             $or: [
@@ -55,10 +56,10 @@ export const getMessages = async (req, res) => {
     }
 };
 
-export const markMessagesRead = async (req, res) => {
+export const markMessagesRead = async (req: Request, res: Response) => {
     try {
         const { friendId } = req.body;
-        const userId = req.user.userID;
+        const userId = (req.user as any).userID;
 
         if (!friendId) {
             return res.status(400).json({ msg: "Friend ID is required" });

@@ -1,12 +1,13 @@
+import { Request, Response } from "express";
 import User from "../models/User.js";
 import FriendRequest from "../models/FriendRequest.js";
 import Message from "../models/Message.js";
 
 // Send a friend request
-export const sendFriendRequest = async (req, res) => {
+export const sendFriendRequest = async (req: Request, res: Response) => {
   try {
     const { receiverId } = req.body;
-    const senderId = req.user.userID;
+    const senderId = (req.user as any).userID;
 
     if (senderId === receiverId) {
       return res.status(400).json({ msg: "You cannot send a friend request to yourself" });
@@ -38,15 +39,15 @@ export const sendFriendRequest = async (req, res) => {
 
     res.status(201).json({ msg: "Friend request sent", request: newRequest });
   } catch (error) {
-    res.status(500).json({ msg: error.message });
+    res.status(500).json({ msg: (error as any).message });
   }
 };
 
 // Accept a friend request
-export const acceptFriendRequest = async (req, res) => {
+export const acceptFriendRequest = async (req: Request, res: Response) => {
   try {
     const { requestId } = req.body;
-    const userId = req.user.userID;
+    const userId = (req.user as any).userID;
 
     const request = await FriendRequest.findById(requestId);
 
@@ -73,15 +74,15 @@ export const acceptFriendRequest = async (req, res) => {
 
     res.status(200).json({ msg: "Friend request accepted" });
   } catch (error) {
-    res.status(500).json({ msg: error.message });
+    res.status(500).json({ msg: (error as any).message });
   }
 };
 
 // Reject a friend request
-export const rejectFriendRequest = async (req, res) => {
+export const rejectFriendRequest = async (req: Request, res: Response) => {
   try {
     const { requestId } = req.body;
-    const userId = req.user.userID;
+    const userId = (req.user as any).userID;
 
     const request = await FriendRequest.findById(requestId);
 
@@ -98,29 +99,33 @@ export const rejectFriendRequest = async (req, res) => {
 
     res.status(200).json({ msg: "Friend request rejected" });
   } catch (error) {
-    res.status(500).json({ msg: error.message });
+    res.status(500).json({ msg: (error as any).message });
   }
 };
 
 // Get pending friend requests
-export const getFriendRequests = async (req, res) => {
+export const getFriendRequests = async (req: Request, res: Response) => {
   try {
-    const userId = req.user.userID;
+    const userId = (req.user as any).userID;
     const requests = await FriendRequest.find({ receiver: userId, status: "pending" })
       .populate("sender", "username email avatarColor");
     
     res.status(200).json({ requests });
   } catch (error) {
-    res.status(500).json({ msg: error.message });
+    res.status(500).json({ msg: (error as any).message });
   }
 };
 
 // Get friends list
-export const getFriends = async (req, res) => {
+export const getFriends = async (req: Request, res: Response) => {
   try {
-    const userId = req.user.userID;
+    const userId = (req.user as any).userID;
     const user = await User.findById(userId).populate("friends", "username email avatarColor bio");
     
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
     const friendsWithCounts = await Promise.all(user.friends.map(async (friend) => {
       const unreadCount = await Message.countDocuments({
         sender: friend._id,
@@ -128,19 +133,19 @@ export const getFriends = async (req, res) => {
         read: false
       });
       return {
-        ...friend.toObject(),
+        ...(friend as any).toObject(),
         unreadCount
       };
     }));
     
     res.status(200).json({ friends: friendsWithCounts });
   } catch (error) {
-    res.status(500).json({ msg: error.message });
+    res.status(500).json({ msg: (error as any).message });
   }
 };
 
 // Search users
-export const searchUsers = async (req, res) => {
+export const searchUsers = async (req: Request, res: Response) => {
   try {
     const { query } = req.query;
     if (!query) return res.status(200).json({ users: [] });
@@ -150,11 +155,11 @@ export const searchUsers = async (req, res) => {
         { username: { $regex: query, $options: "i" } },
         { email: { $regex: query, $options: "i" } },
       ],
-      _id: { $ne: req.user.userID } // Exclude self
-    }).select("username email avatarColor bio");
+      _id: { $ne: (req.user as any).userID } // Exclude self
+    } as any).select("username email avatarColor bio");
 
     res.status(200).json({ users });
   } catch (error) {
-    res.status(500).json({ msg: error.message });
+    res.status(500).json({ msg: (error as any).message });
   }
 };

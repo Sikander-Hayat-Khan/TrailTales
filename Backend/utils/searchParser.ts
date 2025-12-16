@@ -11,7 +11,9 @@
 
 // --- ADT: Token ---
 class Token {
-    constructor(type, value) {
+    type: string;
+    value: any;
+    constructor(type: string, value: any) {
         this.type = type;
         this.value = value;
     }
@@ -19,13 +21,16 @@ class Token {
 
 // --- ADT: AST Nodes ---
 class QueryNode {
-    constructor(type) {
+    type: string;
+    constructor(type: string) {
         this.type = type;
     }
 }
 
 class FilterNode extends QueryNode {
-    constructor(field, value) {
+    field: string;
+    value: any;
+    constructor(field: string, value: any) {
         super('FILTER');
         this.field = field;
         this.value = value;
@@ -33,14 +38,17 @@ class FilterNode extends QueryNode {
 }
 
 class TextNode extends QueryNode {
-    constructor(text) {
+    text: string;
+    constructor(text: string) {
         super('TEXT');
         this.text = text;
     }
 }
 
 class AndNode extends QueryNode {
-    constructor(left, right) {
+    left: QueryNode;
+    right: QueryNode;
+    constructor(left: QueryNode, right: QueryNode) {
         super('AND');
         this.left = left;
         this.right = right;
@@ -49,7 +57,11 @@ class AndNode extends QueryNode {
 
 // --- Automata / Regex: Lexer ---
 class Lexer {
-    constructor(input) {
+    input: string;
+    pos: number;
+    tokens: Token[];
+
+    constructor(input: string) {
         this.input = input;
         this.pos = 0;
         this.tokens = [];
@@ -110,7 +122,10 @@ class Lexer {
 
 // --- Recursion / Grammar: Parser ---
 class Parser {
-    constructor(tokens) {
+    tokens: Token[];
+    pos: number;
+
+    constructor(tokens: Token[]) {
         this.tokens = tokens;
         this.pos = 0;
     }
@@ -125,7 +140,7 @@ class Parser {
 
     // Grammar: Query -> Term Query | epsilon
     parse() {
-        const terms = [];
+        const terms: QueryNode[] = [];
         while (this.peek().type !== 'EOF') {
             terms.push(this.parseTerm());
         }
@@ -159,7 +174,7 @@ class Parser {
     }
 }
 
-export const parseSearchQuery = (query) => {
+export const parseSearchQuery = (query: string) => {
     const lexer = new Lexer(query);
     const tokens = lexer.tokenize();
     const parser = new Parser(tokens);

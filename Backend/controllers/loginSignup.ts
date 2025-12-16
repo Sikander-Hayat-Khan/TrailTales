@@ -1,7 +1,8 @@
+import { Request, Response } from "express";
 import User from "../models/User.js"
 import bcrypt from "bcryptjs"
 
-async function login(req,res){
+async function login(req: Request, res: Response){
     const username = req.body.username
     // Log attempt without sensitive data
     console.log({
@@ -41,7 +42,7 @@ async function login(req,res){
             });
             return res.status(401).json({msg: "Incorrect password"})
         }
-        const token = user.createJWT()
+        const token = (user as any).createJWT()
         
         // Determine if we are in a secure environment (HTTPS)
         const isProduction = process.env.NODE_ENV === 'production';
@@ -67,7 +68,7 @@ async function login(req,res){
     }
 }
 
-async function signup(req,res){
+async function signup(req: Request, res: Response){
     const { username, email, password } = req.body;
     // Log attempt without sensitive data
     console.log({
@@ -95,7 +96,7 @@ async function signup(req,res){
         }
 
         const user = await User.create({username, email, password})
-        const token = user.createJWT()
+        const token = (user as any).createJWT()
         
         const isProduction = process.env.NODE_ENV === 'production';
         const isSecure = isProduction || req.secure || req.headers['x-forwarded-proto'] === 'https';
@@ -117,11 +118,11 @@ async function signup(req,res){
         return res.status(201).json({msg: "User created", user})
     } catch (error) {
         console.error("Signup Error:", error)
-        return res.status(400).json({msg: "Error creating user", error: error.message})
+        return res.status(400).json({msg: "Error creating user", error: (error as any).message})
     }
 }
 
-async function logout(req,res){
+async function logout(req: Request, res: Response){
     const isProduction = process.env.NODE_ENV === 'production';
     const isSecure = isProduction || req.secure || req.headers['x-forwarded-proto'] === 'https';
 
@@ -133,9 +134,9 @@ async function logout(req,res){
     return res.status(200).json({msg: "User logged out"})
 }
 
-async function auth(req,res){
+async function auth(req: Request, res: Response){
     try {
-        const user = await User.findById(req.user.userID).select("-password");
+        const user = await User.findById((req.user as any).userID).select("-password");
         if (!user) return res.status(404).json({ msg: "User not found" });
         return res.status(200).json({ user });
     } catch (error) {
