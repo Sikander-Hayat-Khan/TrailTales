@@ -141,6 +141,7 @@ const MapComponent = ({ onMapClick, isDashboardOpen, activeView, onOpenMemory, o
       zoomControl: false,
       minZoom: 3,
       maxZoom: 18,
+      worldCopyJump: true,
     }).setView([40.4168, -3.7038], 6);
 
     // Option 1: MapTiler with 2x scaling for larger labels

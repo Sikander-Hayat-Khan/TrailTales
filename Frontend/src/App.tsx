@@ -1,5 +1,4 @@
 import { useState, useEffect, Suspense, lazy } from "react";
-import "@phosphor-icons/web/regular";
 import "./App.css";
 import api from "./api/axios";
 
