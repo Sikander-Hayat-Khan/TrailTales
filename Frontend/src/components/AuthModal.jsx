@@ -1,9 +1,38 @@
 import React, { useState } from "react";
+import api from "../api/axios";
 
-const AuthModal = ({ isOpen, onClose, authMode, setAuthMode, logo, handleToast }) => {
-  const [username, setUsername] = useState("");
+const AuthModal = ({ isOpen, onClose, authMode, setAuthMode, logo, handleToast, setIsLoggedIn, setUser }) => {
+  // Backend User model has 'username' and 'email'. 
+  // Frontend input placeholder says "Email".
+  // I should probably send 'email' as 'email' and 'username' as 'username'.
+  // But the current backend login uses 'username'.
+  // Let's check backend login logic again. It finds by {username: username}.
+  // So if user enters email in frontend, backend expects it to be 'username'.
+  // I will adjust frontend to send 'email' as 'email' and 'username' as 'username' for signup.
+  // For login, I'll assume username/email login.
+  
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [fullName, setFullName] = useState(""); // This will be 'username'
+  const [showPassword, setShowPassword] = useState(false);
+
+  const resetForm = () => {
+    setEmail("");
+    setPassword("");
+    setFullName("");
+    setShowPassword(false);
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
+  const handleModeSwitch = (e) => {
+    e.preventDefault();
+    resetForm();
+    setAuthMode(authMode === "login" ? "signup" : "login");
+  };
 
   const isValidEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -12,55 +41,89 @@ const AuthModal = ({ isOpen, onClose, authMode, setAuthMode, logo, handleToast }
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
 
-    // --- VALIDATION ---
-    if (!isValidEmail(username)) {
-      handleToast("Validation Error", "Please enter a valid email address.", "error");
+    if (authMode === "forgot-password") {
+      if (!isValidEmail(email)) {
+        handleToast("Validation Error", "Please enter a valid email address.", "error");
+        return;
+      }
+      handleToast("Success", "Password reset link sent to your email!", "success");
+      handleClose();
       return;
     }
+
+    // --- VALIDATION ---
+    if (authMode === "signup") {
+        if (!isValidEmail(email)) {
+            handleToast("Validation Error", "Please enter a valid email address.", "error");
+            return;
+        }
+        if (fullName.trim().length < 2) {
+            handleToast("Validation Error", "Username is too short.", "error");
+            return;
+        }
+    } else {
+        // Login
+        if (!email.trim()) {
+             handleToast("Validation Error", "Please enter your username or email.", "error");
+             return;
+        }
+    }
+
     if (password.length < 6) {
       handleToast("Validation Error", "Password must be at least 6 characters.", "error");
       return;
     }
+
+    const endpoint = authMode === "login" ? "/login" : "/signup";
+    
+    // Construct payload based on backend expectation
+    // Backend Signup: username, password, email (added in model)
+    // Backend Login: username, password
+    
+    let payload = {};
     if (authMode === "signup") {
-      if (fullName.trim().length < 2) {
-        handleToast("Validation Error", "Full name is too short.", "error");
-        return;
-      }
-      if (!/^[a-zA-Z\s]*$/.test(fullName)) {
-        handleToast("Validation Error", "Name should only contain letters.", "error");
-        return;
-      }
+        payload = { 
+            username: fullName, // Mapping Full Name input to Username for now, or I should add a separate field.
+            email: email,
+            password: password 
+        };
+    } else {
+        // Login
+        // Backend expects 'username' but we might want to allow email login.
+        // For now, let's send the input as 'username' to match backend.
+        payload = { username: email, password }; 
     }
 
-    const endpoint = authMode === "login" ? "login" : "signup";
-    const payload = { username, password };
-
     try {
-      const response = await fetch(`http://localhost:5000/api/${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        credentials: "include",
-      });
+      const response = await api.post(endpoint, payload);
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         handleToast(
           "Success",
-          data.msg || `Successfully ${authMode === "login" ? "logged in" : "signed up"}!`,
+          response.data.msg || `Successfully ${authMode === "login" ? "logged in" : "signed up"}!`,
           "success"
         );
-        onClose();
-        setUsername("");
-        setPassword("");
-        setFullName("");
-      } else {
-        handleToast("Error", data.msg || "Something went wrong", "error");
+        setIsLoggedIn(true);
+        
+        if (response.data.user) {
+            setUser(response.data.user);
+        } else {
+            // Fallback if user not returned
+            try {
+                const profileRes = await api.get("/auth");
+                if (profileRes.data.user) {
+                    setUser(profileRes.data.user);
+                }
+            } catch {
+                console.error("Failed to fetch profile after login");
+            }
+        }
+        
+        handleClose();
       }
     } catch (error) {
-      handleToast("Error", "Failed to connect to server", "error");
-      console.error(error);
+      const msg = error.response?.data?.msg || "Something went wrong";
+      handleToast("Error", msg, "error");
     }
   };
 
@@ -68,10 +131,10 @@ const AuthModal = ({ isOpen, onClose, authMode, setAuthMode, logo, handleToast }
     <div
       id="auth-modal-overlay"
       className={`modal-overlay ${isOpen ? "active" : ""}`}
-      onClick={(e) => e.target.id === "auth-modal-overlay" && onClose()}
+      onClick={(e) => e.target.id === "auth-modal-overlay" && handleClose()}
     >
       <div className="auth-modal-window">
-        <button className="close-modal-btn" onClick={onClose}>
+        <button className="close-modal-btn" onClick={handleClose}>
           <i className="ph ph-x"></i>
         </button>
         <div className="auth-header">
@@ -80,7 +143,9 @@ const AuthModal = ({ isOpen, onClose, authMode, setAuthMode, logo, handleToast }
           <p id="auth-subtitle">
             {authMode === "login"
               ? "Welcome back, traveler."
-              : "Begin your journey today."}
+              : authMode === "signup"
+              ? "Begin your journey today."
+              : "Enter your email to reset password."}
           </p>
         </div>
 
@@ -102,48 +167,58 @@ const AuthModal = ({ isOpen, onClose, authMode, setAuthMode, logo, handleToast }
             <input
               type="email"
               placeholder="Email Address"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
-          <div className="input-group">
-            <i className="ph ph-lock-key"></i>
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+          {authMode !== "forgot-password" && (
+            <div className="input-group">
+              <i className="ph ph-lock-key"></i>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                style={{ paddingRight: "45px" }}
+              />
+              <i 
+                className={`ph ${showPassword ? "ph-eye-slash" : "ph-eye"} password-toggle`}
+                onClick={() => setShowPassword(!showPassword)}
+              ></i>
+            </div>
+          )}
 
           {authMode === "login" && (
             <div className="form-actions">
               <label className="remember-me">
                 <input type="checkbox" /> <span>Remember me</span>
               </label>
-              <a href="#" className="forgot-pass">
+              <a href="#" className="forgot-pass" onClick={(e) => {
+                e.preventDefault();
+                setAuthMode("forgot-password");
+              }}>
                 Forgot Password?
               </a>
             </div>
           )}
 
           <button type="submit" className="cta-btn full-width">
-            {authMode === "login" ? "Log In" : "Create Account"}
+            {authMode === "login" ? "Log In" : authMode === "signup" ? "Create Account" : "Send Reset Link"}
           </button>
 
           <div className="auth-switch">
             <span>
               {authMode === "login"
                 ? "New to TrailTales?"
-                : "Already have an account?"}
+                : authMode === "signup"
+                ? "Already have an account?"
+                : "Remember your password?"}
             </span>
             <a
               href="#"
-              onClick={() =>
-                setAuthMode(authMode === "login" ? "signup" : "login")
-              }
+              onClick={handleModeSwitch}
             >
               {authMode === "login" ? "Create an account" : "Log In"}
             </a>

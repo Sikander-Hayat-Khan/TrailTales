@@ -49,40 +49,66 @@ const LandingSection = ({ setDashboardOpen }) => {
 
   return (
     <main className="hero-section">
+      {/* Decorative Background Elements */}
+      <div className="floating-elements">
+        <div className="float-circle c-1"></div>
+        <div className="float-circle c-2"></div>
+        <div className="float-icon i-1">
+          <i className="ph ph-map-pin-line"></i>
+        </div>
+        <div className="float-icon i-2">
+          <i className="ph ph-compass"></i>
+        </div>
+      </div>
+
       <div className="content-box">
-        <h4>Start your journey</h4>
+        <h4>
+          <i className="ph ph-paper-plane-tilt"></i> Start your journey
+        </h4>
         <div className="title-container">
           <h1>
-            Welcome to <span className="typing-text">{renderTypingText()}</span>
+            Welcome to <br />
+            <span className="typing-text">{renderTypingText()}</span>
             <span className="cursor"></span>
           </h1>
         </div>
         <p>
           Pin your moments, share your adventures, and turn your travels into a
-          timeless journal.
+          timeless journal. Join a community of explorers today.
         </p>
         <button className="cta-btn" onClick={() => setDashboardOpen(true)}>
-          Start Journaling
+          Start Journaling <i className="ph ph-arrow-right"></i>
         </button>
       </div>
 
       <div className="carousel-container">
-        <button id="prevBtn" className="nav-arrow" onClick={prevCard}>
-          &#10094;
+        <button id="prevBtn" className="nav-arrow" onClick={prevCard} aria-label="Previous image">
+          <i className="ph ph-caret-left"></i>
         </button>
         <div className="card-stack">
           {cards.map((card, index) => (
             <div
               key={index}
               className={`card ${index === currentCard ? "active" : ""}`}
-              style={{ backgroundImage: `url('${card.img}')` }}
+              role="group"
+              aria-label={`Image of ${card.country}`}
             >
-              <div className="card-info">{card.country}</div>
+              <img 
+                src={card.img} 
+                alt={`Scenic view of ${card.country}`} 
+                className="card-img"
+                loading={index === 0 ? "eager" : "lazy"}
+                width="2070"
+                height="1380"
+              />
+              <div className="card-info">
+                <span>{card.country}</span>
+              </div>
             </div>
           ))}
         </div>
-        <button id="nextBtn" className="nav-arrow" onClick={nextCard}>
-          &#10095;
+        <button id="nextBtn" className="nav-arrow" onClick={nextCard} aria-label="Next image">
+          <i className="ph ph-caret-right"></i>
         </button>
       </div>
     </main>

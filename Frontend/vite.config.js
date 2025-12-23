@@ -7,5 +7,16 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: false,
-  }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          leaflet: ['leaflet'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
 })

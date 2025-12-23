@@ -1,0 +1,18 @@
+
+/* Notification Dot */
+.notification-dot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 10px;
+  height: 10px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  border: 2px solid #151925;
+  z-index: 10;
+}
+
+.mobile-nav .notification-dot {
+  top: 5px;
+  right: 25%;
+}
