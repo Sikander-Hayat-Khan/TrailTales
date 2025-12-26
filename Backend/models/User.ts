@@ -1,7 +1,11 @@
-import mongoose from "mongoose"
-import bcryptjs from "bcryptjs"
-import jwt from "jsonwebtoken"
+import mongoose from "mongoose";
+import bcryptjs from "bcryptjs";
+import jwt from "jsonwebtoken";
 
+/*
+  User Schema
+  Defines the structure of a user document in MongoDB
+*/
 const UserSchema = new mongoose.Schema({
     username:{
         type: String,

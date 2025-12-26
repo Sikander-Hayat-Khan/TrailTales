@@ -6,66 +6,93 @@ import notificationRouter from "./routes/notificationRouter.js";
 import cookieParser from "cookie-parser";
 import connect from "./db/connect.js";
 import cors from "cors";
-import "dotenv/config"
+import "dotenv/config";
 
-const app = express()
+const app = express();
 
-// Trust proxy for secure cookies behind load balancer (Render)
-app.set('trust proxy', 1);
+/*
+  Trust the first proxy (important for platforms like Render / Vercel)
+  This allows secure cookies (https) to work correctly behind a load balancer
+*/
+app.set("trust proxy", 1);
 
-app.use(cors({
+/*
+  CORS Configuration:
+  - Allows requests from:
+    • Localhost (any port)
+    • Vercel deployments (*.vercel.app)
+  - Enables cookies & authentication headers
+*/
+app.use(
+  cors({
     origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-        
-        // Allow any localhost origin
-        if (origin.match(/^http:\/\/localhost:\d+$/)) {
-            return callback(null, true);
-        }
-        
-        // Allow Vercel deployments
-        if (origin === "https://trail-tales-chi.vercel.app" || origin.match(/\.vercel\.app$/)) {
-            return callback(null, true);
-        }
-        
-        // Default to blocking
-        // callback(new Error('Not allowed by CORS'));
-        // For debugging, let's log blocked origins but maybe allow them temporarily if needed?
-        // Better to just block if not matched.
-        console.log("Blocked by CORS:", origin);
-        callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+      // Allow requests with no origin (e.g., mobile apps, Postman, curl)
+      if (!origin) return callback(null, true);
 
-// Handle preflight requests explicitly
-// In Express 5, use a RegExp to match all routes for OPTIONS
+      // Allow any localhost origin
+      if (origin.match(/^http:\/\/localhost:\d+$/)) {
+        return callback(null, true);
+      }
+
+      // Allow Vercel frontend deployments
+      if (
+        origin === "https://trail-tales-chi.vercel.app" ||
+        origin.match(/\.vercel\.app$/)
+      ) {
+        return callback(null, true);
+      }
+
+      // Block all other origins
+      console.log("Blocked by CORS:", origin);
+      callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true, // Allow cookies and auth headers
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+/*
+  Handle CORS preflight (OPTIONS) requests for all routes
+  Required for browsers before sending credentialed requests
+*/
 app.options(/.*/, cors());
 
-app.use(express.json())
-app.use(cookieParser())
-app.use("/uploads", express.static("uploads"));
+/*
+  Global Middlewares
+*/
+app.use(express.json());        // Parse incoming JSON requests
+app.use(cookieParser());        // Parse cookies from requests
+app.use("/uploads", express.static("uploads")); // Serve uploaded files
 
-app.use("/api",userRouter)
+/*
+  API Routes
+*/
+app.use("/api", userRouter);
 app.use("/api/friends", friendRouter);
 app.use("/api/messages", messageRouter);
 app.use("/api/notifications", notificationRouter);
 
-async function start(){
-    try {
-        console.log("Attempting to connect to MongoDB...");
-        await connect()
-        console.log("Connected to MongoDB successfully");
-        const port = process.env.PORT || 5000
-        app.listen(port,()=>{
-            console.log(`Server is listening on port ${port}...`)
-        })
-    } catch (error) {
-        console.log("ERROR STARTING SERVER:");
-        console.log(error)
-    }
+/*
+  Server Startup Function
+  - Connects to MongoDB
+  - Starts the Express server
+*/
+async function start() {
+  try {
+    console.log("Attempting to connect to MongoDB...");
+    await connect();
+    console.log("Connected to MongoDB successfully");
+
+    const port = process.env.PORT || 5000;
+    app.listen(port, () => {
+      console.log(`Server is listening on port ${port}...`);
+    });
+  } catch (error) {
+    console.log("ERROR STARTING SERVER:");
+    console.log(error);
+  }
 }
 
-start()
+// Initialize server
+start();
